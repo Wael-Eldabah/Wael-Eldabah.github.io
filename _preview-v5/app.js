@@ -15,6 +15,7 @@ function updateMotion() {
   $('#motionIcon').textContent = playing ? 'Ⅱ' : '▷';
   sceneModule?.setMotion(playing);
   startRadar();
+  document.dispatchEvent(new CustomEvent('portfolio:motion', { detail: { playing } }));
 }
 motionButton.addEventListener('click', () => { playing = !playing; updateMotion(); });
 reduced.addEventListener('change', () => { playing = !reduced.matches; updateMotion(); });
@@ -27,7 +28,7 @@ $('#disperseButton').addEventListener('click', e => {
 });
 // Keep the readable HTML and environment available before loading any 3D code.
 const loadScenes = async () => {
-  try { sceneModule = await import('./dist/scene.js?v=5.2'); sceneModule.initScenes(); sceneModule.setMotion(playing); sceneModule.setSpread(dispersed); }
+  try { sceneModule = await import('./dist/scene.js?v=6.0'); sceneModule.initScenes(); sceneModule.setMotion(playing); sceneModule.setSpread(dispersed); }
   catch (e) { $('#disperseButton').hidden = true; $('.scene-caption').textContent = 'OBSIDIAN / VIOLET / MINT'; console.warn('Artwork fallback active.', e.message); }
 };
 if ('requestIdleCallback' in window) requestIdleCallback(loadScenes, { timeout: 600 }); else setTimeout(loadScenes, 60);
@@ -50,10 +51,6 @@ addEventListener('scroll', () => {
 }, { passive: true });
 const reveal = new IntersectionObserver(entries => entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('revealed'); reveal.unobserve(e.target); } }), { threshold: .05 });
 $$('.reveal').forEach(el => reveal.observe(el));
-const navObserver = new IntersectionObserver(entries => entries.forEach(e => {
-  if (e.isIntersecting) $$('.desktop-nav a').forEach(a => a.classList.toggle('is-active', a.hash === `#${e.target.id}`));
-}), { rootMargin: '-12% 0px -62% 0px' });
-$$('main section[id]').forEach(s => navObserver.observe(s));
 
 const states = [
   { mode: 'CAPTURE', metrics: ['INGEST', 'READY', 'FLOW'], kicker: 'PASSIVE TRAFFIC ANALYSIS', title: 'Every packet<br>has a story.', description: 'Passive traffic capture with Scapy / PyShark, network flow reconstruction and feature extraction to turn raw packets into useful security telemetry.', tags: ['PYTHON', 'SCAPY', 'PYSHARK'] },
@@ -70,6 +67,7 @@ function setStage(i) {
   $('#researchTags').replaceChildren(...s.tags.map(t => { const el = document.createElement('span'); el.textContent = t; return el; }));
   $$('.soc-switch,.stage').forEach(button => { const selected = Number(button.dataset.index) === i; button.classList.toggle('active', selected); button.setAttribute('aria-selected', String(selected)); button.tabIndex = selected ? 0 : -1; });
   startRadar();
+  document.dispatchEvent(new CustomEvent('portfolio:stage', { detail: { index: i } }));
 }
 $$('[role="tablist"]').forEach((list, group) => {
   const tabs = $$('[role="tab"]', list);
