@@ -27,7 +27,7 @@ $('#disperseButton').addEventListener('click', e => {
 });
 // Keep the readable HTML and environment available before loading any 3D code.
 const loadScenes = async () => {
-  try { sceneModule = await import('./dist/scene.js?v=5'); sceneModule.initScenes(); sceneModule.setMotion(playing); sceneModule.setSpread(dispersed); }
+  try { sceneModule = await import('./dist/scene.js?v=5.2'); sceneModule.initScenes(); sceneModule.setMotion(playing); sceneModule.setSpread(dispersed); }
   catch (e) { $('#disperseButton').hidden = true; $('.scene-caption').textContent = 'OBSIDIAN / VIOLET / MINT'; console.warn('Artwork fallback active.', e.message); }
 };
 if ('requestIdleCallback' in window) requestIdleCallback(loadScenes, { timeout: 600 }); else setTimeout(loadScenes, 60);

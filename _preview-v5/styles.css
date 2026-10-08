@@ -283,3 +283,12 @@ footer>span,footer>a:last-child { font:8px var(--mono); color:#9db2bd }
 }
 @media (max-width:390px) { .hero { height:880px }.hero h1 { font-size:76px }.role { font-size:21px }.short-desc { font-size:11px }.hero-copy .button { font-size:8px; padding-inline:12px; gap:13px }.hero-disciplines { gap:21px }.hero-art { height:435px; bottom:50px; left:-18%; width:115% }.portrait-panel { height:252px; bottom:100px }.hero-disciplines p { font-size:6px }.scene-controls { gap:8px }.scene-caption { font-size:5px }.project-intro h3 { font-size:21px }.project-intro h2 { font-size:58px }.soc-stage { margin-left:-12%; margin-right:16px }.credential-card { padding:12px 10px; gap:7px; grid-template-columns:29px 1fr }.credential-logo { width:29px; height:29px }.credential-card h3 { font-size:9px }.credential-card p { font-size:6px }.credential-bottom { font-size:5px } }
 @media (prefers-reduced-motion:reduce) { html { scroll-behavior:auto }*,*:before,*:after { animation-duration:.001ms!important; animation-iteration-count:1!important; transition-duration:.001ms!important } }
+/* Art-only compatibility mode never exposes pieces of the original page mockup. */
+.fallback-orbit-back { position:absolute; inset:0; width:100%; height:100%; z-index:0!important; pointer-events:none }
+.scene-layered .scene-fallback { filter:drop-shadow(0 0 12px #7440ba20); will-change:transform }
+.hero-art .scene-fallback { padding:12px 8% 18px 4% }
+.scene-layered .spec-label { right:2% }
+.orb-zone .scene-fallback { width:81%; height:90%; top:5%; left:-1% }
+.orb-zone .fallback-orbit-back { left:-13%; width:106%; height:110%; top:-4% }
+@media(max-width:960px) { .orb-zone .fallback-orbit-back { width:160%; left:-40% }.orb-zone .scene-fallback { width:125%; left:-17%; height:90% } }
+@media(max-width:680px) { .hero-art .scene-fallback { padding:0 1% 0 0 }.orb-zone .scene-fallback { width:110%; left:-12%; height:87%; top:7% }.orb-zone .fallback-orbit-back { width:145%; left:-30%; top:-4%; height:113% } }
