@@ -1,36 +1,168 @@
-(()=>{'use strict';
-const reduced=matchMedia('(prefers-reduced-motion: reduce)').matches;const fine=matchMedia('(pointer:fine)').matches;const mobile=matchMedia('(max-width:720px)').matches;
-const $=(s,root=document)=>root.querySelector(s);const $$=(s,root=document)=>Array.from(root.querySelectorAll(s));
-const curtain=$('#loadCurtain');let loaded=false;const ready=()=>{if(loaded)return;loaded=true;curtain?.classList.add('loaded')};addEventListener('load',ready,{once:true});setTimeout(ready,1850);
-$('#year').textContent=new Date().getFullYear();
-const menuToggle=$('#menuToggle'),mobileNav=$('#mobileNav');const closeMenu=()=>{mobileNav.hidden=true;menuToggle.setAttribute('aria-expanded','false');menuToggle.setAttribute('aria-label','Open navigation')};menuToggle.addEventListener('click',()=>{const next=mobileNav.hidden;mobileNav.hidden=!next;menuToggle.setAttribute('aria-expanded',String(next));menuToggle.setAttribute('aria-label',next?'Close navigation':'Open navigation')});$$('.mobile-nav a').forEach(a=>a.addEventListener('click',closeMenu));addEventListener('keydown',e=>{if(e.key==='Escape'){closeMenu();closeDimension()}});
-const progress=$('#scrollLine');let scrolled=false;addEventListener('scroll',()=>{if(scrolled)return;scrolled=true;requestAnimationFrame(()=>{const m=document.documentElement.scrollHeight-innerHeight;progress.style.width=(m>0?Math.min(100,scrollY/m*100):0)+'%';scrolled=false})},{passive:true});
-const revealers=$$('.reveal');if(!reduced&&'IntersectionObserver' in window){const revealObs=new IntersectionObserver(es=>{es.forEach(e=>{if(e.isIntersecting){e.target.classList.add('revealed');revealObs.unobserve(e.target)}})},{threshold:.12,rootMargin:'0px 0px -24px 0px'});revealers.forEach(e=>revealObs.observe(e))}else revealers.forEach(e=>e.classList.add('revealed'));
-if('IntersectionObserver' in window){const navObserver=new IntersectionObserver(es=>{es.forEach(e=>{if(e.isIntersecting){$$('.desktop-nav a').forEach(a=>a.classList.toggle('is-active',a.hash==='#'+e.target.id))}})},{rootMargin:'-28% 0px -61% 0px'});$$('main section[id]').forEach(s=>navObserver.observe(s))}
-if(!reduced){const wipe=document.createElement('div');wipe.setAttribute('aria-hidden','true');wipe.style.cssText='position:fixed;inset:0;z-index:90;pointer-events:none;background:linear-gradient(105deg,transparent 24%,rgba(116,255,224,.20) 46%,rgba(154,105,255,.22) 54%,transparent 75%);transform:translateX(-140%);transition:transform .68s cubic-bezier(.2,.72,.17,1);';document.body.append(wipe);$$('a[href^="#"]').forEach(a=>a.addEventListener('click',()=>{wipe.style.transition='none';wipe.style.transform='translateX(-140%)';requestAnimationFrame(()=>{wipe.style.transition='transform .68s cubic-bezier(.2,.72,.17,1)';wipe.style.transform='translateX(145%)'})}))}
-if(!reduced&&fine){const pointer=$('#customCursor');let x=-50,y=-50,px=-50,py=-50;addEventListener('pointermove',e=>{x=e.clientX;y=e.clientY;pointer.style.opacity='.75'},{passive:true});$$('a,button').forEach(a=>{a.addEventListener('pointerenter',()=>pointer.classList.add('active'));a.addEventListener('pointerleave',()=>pointer.classList.remove('active'))});const drawCursor=()=>{px+=(x-px)*.15;py+=(y-py)*.15;pointer.style.left=px+'px';pointer.style.top=py+'px';if(!document.hidden)requestAnimationFrame(drawCursor)};requestAnimationFrame(drawCursor)}
-const art=$('#heroArt');if(art&&!reduced&&fine){art.addEventListener('pointermove',e=>{const b=art.getBoundingClientRect(),x=(e.clientX-b.left)/b.width-.5,y=(e.clientY-b.top)/b.height-.5;art.style.setProperty('--parallax-x',(-x*14).toFixed(1)+'px');art.style.setProperty('--parallax-y',(-y*12).toFixed(1)+'px')},{passive:true});art.addEventListener('pointerleave',()=>{art.style.setProperty('--parallax-x','0px');art.style.setProperty('--parallax-y','0px')})}
-// Physically projected 4D tesseract, independently rotated on XW and YZ planes.
-const vertices4=[];for(let i=0;i<16;i++)vertices4.push([(i&1)?1:-1,(i&2)?1:-1,(i&4)?1:-1,(i&8)?1:-1]);
-const edges4=[];for(let i=0;i<16;i++)for(let j=i+1;j<16;j++){const v=i^j;if(v && (v&(v-1))===0)edges4.push([i,j])}
-function projected4(t,offsetX=0,offsetY=0){return vertices4.map(p=>{let[x,y,z,w]=p;const aw=t*.39+offsetX,bw=t*.26+offsetY;let u=x*Math.cos(aw)-w*Math.sin(aw);w=x*Math.sin(aw)+w*Math.cos(aw);x=u;u=y*Math.cos(bw)-z*Math.sin(bw);z=y*Math.sin(bw)+z*Math.cos(bw);y=u;u=z*Math.cos(t*.17)-w*Math.sin(t*.17);w=z*Math.sin(t*.17)+w*Math.cos(t*.17);z=u;const k=3.8/(3.8-w*.38);x*=k;y*=k;z*=k;const ry=t*.21;u=x*Math.cos(ry)-z*Math.sin(ry);z=x*Math.sin(ry)+z*Math.cos(ry);x=u;return {x,y,z} })}
-function initHeroGL(canvas){const gl=canvas.getContext('webgl',{alpha:true,antialias:true,premultipliedAlpha:false,preserveDrawingBuffer:false,powerPreference:'low-power'});if(!gl)return null;const vsrc='attribute vec2 aPos;attribute vec4 aColor;varying vec4 vColor;uniform float uSize;void main(){vColor=aColor;gl_Position=vec4(aPos,0.,1.);gl_PointSize=uSize;}';const fsrc='precision mediump float;varying vec4 vColor;void main(){gl_FragColor=vColor;}';const compile=(src,type)=>{const sh=gl.createShader(type);gl.shaderSource(sh,src);gl.compileShader(sh);return sh};const program=gl.createProgram();gl.attachShader(program,compile(vsrc,gl.VERTEX_SHADER));gl.attachShader(program,compile(fsrc,gl.FRAGMENT_SHADER));gl.linkProgram(program);if(!gl.getProgramParameter(program,gl.LINK_STATUS))return null;gl.useProgram(program);const posAttr=gl.getAttribLocation(program,'aPos'),colorAttr=gl.getAttribLocation(program,'aColor'),sizeUniform=gl.getUniformLocation(program,'uSize');const positionBuf=gl.createBuffer(),colorBuf=gl.createBuffer();gl.enableVertexAttribArray(posAttr);gl.enableVertexAttribArray(colorAttr);gl.enable(gl.BLEND);gl.blendFunc(gl.SRC_ALPHA,gl.ONE);gl.disable(gl.DEPTH_TEST);let w=100,h=100,dpr=1,active=true,frame=0,intersecting=true,t=0;
-const resize=()=>{const r=canvas.getBoundingClientRect();w=Math.max(10,r.width);h=Math.max(10,r.height);dpr=Math.min(devicePixelRatio||1,mobile?1.25:1.8);canvas.width=Math.round(w*dpr);canvas.height=Math.round(h*dpr);gl.viewport(0,0,canvas.width,canvas.height)};
-function draw(ms){if(!active||!intersecting||document.hidden){frame=0;return}if(reduced){t=1}else{t=ms*.001}gl.clearColor(0,0,0,0);gl.clear(gl.COLOR_BUFFER_BIT);const p=projected4(t),coords=[],colors=[];const centerX=.06,centerY=.025,s=.16;
-for(let i=0;i<edges4.length;i++){const[a,b]=edges4[i];for(const idx of [a,b]){const v=p[idx],q=2.9/(2.9-v.z*.13);coords.push(v.x*s*q+centerX,v.y*s*q+centerY);const tint=idx%4===0?[.40,1,.83,.30]:[.63,.31,1,.28];colors.push(...tint)}}
-const drawBatch=(points,tints,mode,size)=>{gl.bindBuffer(gl.ARRAY_BUFFER,positionBuf);gl.bufferData(gl.ARRAY_BUFFER,new Float32Array(points),gl.DYNAMIC_DRAW);gl.vertexAttribPointer(posAttr,2,gl.FLOAT,false,0,0);gl.bindBuffer(gl.ARRAY_BUFFER,colorBuf);gl.bufferData(gl.ARRAY_BUFFER,new Float32Array(tints),gl.DYNAMIC_DRAW);gl.vertexAttribPointer(colorAttr,4,gl.FLOAT,false,0,0);gl.uniform1f(sizeUniform,size*dpr);gl.drawArrays(mode,0,points.length/2)};
-drawBatch(coords,colors,gl.LINES,1);
-const particles=[],pcol=[];for(let i=0;i<72;i++){const a=i*2.399963+.36*t,b=Math.sin(i*13.4)*.2,r=.30+.12*Math.sin(i*1.4+t*.2);particles.push(centerX+Math.cos(a)*r,centerY+(Math.sin(a)*.38+b)*r);pcol.push(.43+.2*Math.sin(i),.95,.88,.24+.14*Math.sin(t+i))}drawBatch(particles,pcol,gl.POINTS,1.5);if(!reduced)frame=requestAnimationFrame(draw)}
-resize();if('ResizeObserver'in window)new ResizeObserver(resize).observe(canvas);if('IntersectionObserver'in window)new IntersectionObserver(es=>{intersecting=es[0].isIntersecting;if(intersecting&&!frame)frame=requestAnimationFrame(draw)},{threshold:.01}).observe(canvas);frame=requestAnimationFrame(draw);return {stop:()=>{active=false;cancelAnimationFrame(frame)}}}
-initHeroGL($('#heroCanvas'));
-// EyeGuard: coherent descriptive states, NOT fabricated SOC detections.
-const states=[{mode:'CAPTURE',metrics:['INGEST','READY','FLOW'],kicker:'PASSIVE TRAFFIC ANALYSIS',title:'Every packet<br>has a story.',description:'Passive traffic capture with Scapy / PyShark, network flow reconstruction and feature extraction to turn raw packets into useful security telemetry.',tags:['PYTHON','SCAPY','PYSHARK']},{mode:'DETECT',metrics:['FEATURES','SCORING','ANOMALY'],kicker:'ML-ASSISTED DETECTION',title:'Patterns beyond<br>signatures.',description:'Isolation Forest, LightGBM, Random Forest and XGBoost are explored for attack classification and anomaly analysis using benchmark network security datasets.',tags:['ISOLATION FOREST','LIGHTGBM','XGBOOST']},{mode:'ENRICH',metrics:['IOC','CONTEXT','TRIAGE'],kicker:'THREAT INTELLIGENCE CONTEXT',title:'An alert needs<br>context.',description:'Indicators can be enriched with reputation and exposure intelligence from VirusTotal, AlienVault OTX, AbuseIPDB and Shodan.',tags:['VIRUSTOTAL','OTX','ABUSEIPDB']},{mode:'RESPOND',metrics:['POLICY','REVIEW','ACTION'],kicker:'RESPONSE ENGINEERING ROADMAP',title:'From signal<br>to decision.',description:'EyeGuard explores policy-driven incident response through connector-based workflows. These are architectural concepts, not claims of live automated production containment.',tags:['RESPONSE POLICY','INTEGRATIONS','RESEARCH']}];
-function setStage(i){const s=states[i];$('#socModeText').textContent=s.mode;$('#metricOne').textContent=s.metrics[0];$('#metricTwo').textContent=s.metrics[1];$('#metricThree').textContent=s.metrics[2];$('#researchKicker').textContent=s.kicker;$('#researchTitle').innerHTML=s.title;$('#researchDescription').textContent=s.description;$('#researchTags').replaceChildren(...s.tags.map(t=>{const x=document.createElement('span');x.textContent=t;return x}));$$('.soc-switch,.stage').forEach(b=>{const sel=Number(b.dataset.index)===i;b.classList.toggle('active',sel);b.setAttribute('aria-selected',String(sel))})}$$('.soc-switch,.stage').forEach(b=>b.addEventListener('click',()=>setStage(Number(b.dataset.index))));
-// Ambient radar: synthetic graphics, no data fetches or claims of monitoring real targets.
-const telemetry=$('#networkVisual'),telCtx=telemetry.getContext('2d',{alpha:true});let radarVisible=true;if('IntersectionObserver' in window)new IntersectionObserver(es=>{radarVisible=es[0].isIntersecting},{threshold:.01}).observe(telemetry);let lastRadar=0;function radar(ts){if(radarVisible&&!document.hidden&&telCtx&&ts-lastRadar>(mobile?53:30)){lastRadar=ts;const dpr=Math.min(devicePixelRatio||1,1.5),w=Math.round(telemetry.clientWidth*dpr),h=Math.round(telemetry.clientHeight*dpr);if(telemetry.width!==w||telemetry.height!==h){telemetry.width=w;telemetry.height=h}telCtx.clearRect(0,0,w,h);telCtx.strokeStyle='rgba(98,241,208,.13)';telCtx.lineWidth=.6;for(let x=0;x<w;x+=w/12){telCtx.beginPath();telCtx.moveTo(x,0);telCtx.lineTo(x,h);telCtx.stroke()}for(let y=0;y<h;y+=h/5){telCtx.beginPath();telCtx.moveTo(0,y);telCtx.lineTo(w,y);telCtx.stroke()}const t=reduced?0:ts*.00016,cx=w*.57,cy=h*.50,r=h*.32;for(let i=0;i<27;i++){const a=i*2.39996+t,rr=Math.sqrt(i/27)*r*2.1,x=cx+rr*Math.cos(a)*1.45,y=cy+rr*Math.sin(a)*.72;telCtx.fillStyle=i%4===0?'rgba(172,116,255,.8)':'rgba(120,255,224,.65)';telCtx.beginPath();telCtx.arc(x,y,Math.max(1,1.7*dpr),0,Math.PI*2);telCtx.fill();if(i%3===0){telCtx.strokeStyle='rgba(127,239,227,.20)';telCtx.beginPath();telCtx.moveTo(cx,cy);telCtx.lineTo(x,y);telCtx.stroke()}}}if(!reduced)requestAnimationFrame(radar)}requestAnimationFrame(radar);
-// Modal: genuine higher-dimensional coordinate math with user-controlled speed/pointer rotation.
-const modal=$('#dimensionModal'),dimCanvas=$('#dimensionCanvas'),dimCtx=dimCanvas.getContext('2d'),speed=$('#speedRange'),speedVal=$('#speedValue');let modalOpen=false,dimFrame=0,dragging=false,rotX=0,rotY=0,lastX=0,lastY=0;
-function closeDimension(){if(!modalOpen)return;modalOpen=false;modal.hidden=true;document.body.classList.remove('modal-open');cancelAnimationFrame(dimFrame);$('#dimensionButton').focus()}
-function drawDim(ms){if(!modalOpen)return;const box=dimCanvas.getBoundingClientRect(),d=Math.min(devicePixelRatio||1,2),w=box.width,h=box.height;if(dimCanvas.width!==Math.round(w*d)||dimCanvas.height!==Math.round(h*d)){dimCanvas.width=Math.round(w*d);dimCanvas.height=Math.round(h*d)}dimCtx.setTransform(d,0,0,d,0,0);dimCtx.clearRect(0,0,w,h);const t=ms*.0006*Number(speed.value),ps=projected4(t,rotX,rotY),cx=w/2,cy=h/2,s=Math.min(w,h)*.24;dimCtx.lineWidth=1.25;for(let i=0;i<edges4.length;i++){const [a,b]=edges4[i],u=ps[a],v=ps[b];const du=3/(3-u.z*.22),dv=3/(3-v.z*.22);dimCtx.strokeStyle=i%3===0?'rgba(175,119,255,.7)':'rgba(112,255,222,.65)';dimCtx.beginPath();dimCtx.moveTo(cx+u.x*s*du,cy+u.y*s*du);dimCtx.lineTo(cx+v.x*s*dv,cy+v.y*s*dv);dimCtx.stroke()}ps.forEach((p,i)=>{const k=3/(3-p.z*.22),x=cx+p.x*s*k,y=cy+p.y*s*k;dimCtx.beginPath();dimCtx.arc(x,y,i%3===0?3:2,0,Math.PI*2);dimCtx.fillStyle=i%3===0?'#b493ff':'#7affda';dimCtx.fill()});if(!reduced)dimFrame=requestAnimationFrame(drawDim)}
-$('#dimensionButton').addEventListener('click',()=>{modal.hidden=false;modalOpen=true;document.body.classList.add('modal-open');$('#dimensionClose').focus();dimFrame=requestAnimationFrame(drawDim)});$('#dimensionClose').addEventListener('click',closeDimension);modal.addEventListener('pointerdown',e=>{if(e.target===modal)closeDimension()});$('#dimensionReset').addEventListener('click',()=>{rotX=0;rotY=0;speed.value='1';speedVal.textContent='1.0×';if(reduced)drawDim(0)});speed.addEventListener('input',()=>{speedVal.textContent=Number(speed.value).toFixed(1)+'×';if(reduced)drawDim(0)});dimCanvas.addEventListener('pointerdown',e=>{dragging=true;lastX=e.clientX;lastY=e.clientY;dimCanvas.setPointerCapture(e.pointerId)});dimCanvas.addEventListener('pointermove',e=>{if(!dragging)return;rotX+=(e.clientX-lastX)*.008;rotY+=(e.clientY-lastY)*.008;lastX=e.clientX;lastY=e.clientY;if(reduced)drawDim(0)});dimCanvas.addEventListener('pointerup',()=>{dragging=false});dimCanvas.addEventListener('pointercancel',()=>{dragging=false});
-})();
+const $ = (s, root = document) => root.querySelector(s);
+const $$ = (s, root = document) => [...root.querySelectorAll(s)];
+const reduced = matchMedia('(prefers-reduced-motion: reduce)');
+let playing = !reduced.matches;
+let sceneModule;
+let modalWasPlaying = false;
+let dispersed = false;
+const motionButton = $('#motionButton');
+
+function updateMotion() {
+  document.body.classList.toggle('motion-paused', !playing);
+  motionButton.setAttribute('aria-pressed', String(!playing));
+  motionButton.setAttribute('aria-label', playing ? 'Pause animation' : 'Play animation');
+  $('#motionText').textContent = playing ? 'PAUSE' : 'PLAY';
+  $('#motionIcon').textContent = playing ? 'Ⅱ' : '▷';
+  sceneModule?.setMotion(playing);
+  startRadar();
+  document.dispatchEvent(new CustomEvent('portfolio:motion', { detail: { playing } }));
+}
+motionButton.addEventListener('click', () => { playing = !playing; updateMotion(); });
+reduced.addEventListener('change', () => { playing = !reduced.matches; updateMotion(); });
+$('#disperseButton').addEventListener('click', e => {
+  dispersed = !dispersed;
+  const button = e.currentTarget;
+  button.setAttribute('aria-pressed', String(dispersed));
+  button.innerHTML = dispersed ? 'REASSEMBLE <span>↙</span>' : 'DISPERSE <span>↗</span>';
+  sceneModule?.setSpread(dispersed);
+});
+// Keep the readable HTML and environment available before loading any 3D code.
+const loadScenes = async () => {
+  try { sceneModule = await import('./dist/scene.js?v=6.1'); sceneModule.initScenes(); sceneModule.setMotion(playing); sceneModule.setSpread(dispersed); }
+  catch (e) { $('#disperseButton').hidden = true; $('.scene-caption').textContent = 'OBSIDIAN / VIOLET / MINT'; console.warn('Artwork fallback active.', e.message); }
+};
+if ('requestIdleCallback' in window) requestIdleCallback(loadScenes, { timeout: 600 }); else setTimeout(loadScenes, 60);
+
+$('#year').textContent = new Date().getFullYear();
+const menu = $('#mobileNav');
+const menuButton = $('#menuToggle');
+function closeMenu() { menu.hidden = true; menuButton.setAttribute('aria-expanded', 'false'); menuButton.setAttribute('aria-label', 'Open navigation'); }
+menuButton.addEventListener('click', () => { const open = menu.hidden; menu.hidden = !open; menuButton.setAttribute('aria-expanded', String(open)); menuButton.setAttribute('aria-label', open ? 'Close navigation' : 'Open navigation'); });
+$$('.mobile-nav a').forEach(a => a.addEventListener('click', closeMenu));
+addEventListener('keydown', e => { if (e.key === 'Escape' && !menu.hidden) { closeMenu(); menuButton.focus(); } });
+const portrait = $('.portrait-image');
+portrait.addEventListener('error', () => portrait.classList.add('is-unavailable'));
+if (portrait.complete && !portrait.naturalWidth) portrait.classList.add('is-unavailable');
+
+let scrollFrame = 0;
+addEventListener('scroll', () => {
+  if (scrollFrame) return;
+  scrollFrame = requestAnimationFrame(() => { const range = document.documentElement.scrollHeight - innerHeight; $('#scrollLine').style.width = `${range > 0 ? scrollY / range * 100 : 0}%`; scrollFrame = 0; });
+}, { passive: true });
+const reveal = new IntersectionObserver(entries => entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('revealed'); reveal.unobserve(e.target); } }), { threshold: .05, rootMargin: '80px' });
+$$('.reveal').forEach(el => reveal.observe(el));
+
+const states = [
+  { mode: 'CAPTURE', metrics: ['INGEST', 'READY', 'FLOW'], kicker: 'PASSIVE TRAFFIC ANALYSIS', title: 'Every packet<br>has a story.', description: 'Passive traffic capture with Scapy / PyShark, network flow reconstruction and feature extraction to turn raw packets into useful security telemetry.', tags: ['PYTHON', 'SCAPY', 'PYSHARK'] },
+  { mode: 'DETECT', metrics: ['FEATURES', 'SCORING', 'ANOMALY'], kicker: 'ML-ASSISTED DETECTION', title: 'Patterns beyond<br>signatures.', description: 'Isolation Forest, LightGBM, Random Forest and XGBoost are explored for attack classification and anomaly analysis using benchmark network security datasets.', tags: ['ISOLATION FOREST', 'LIGHTGBM', 'XGBOOST'] },
+  { mode: 'ENRICH', metrics: ['IOC', 'CONTEXT', 'TRIAGE'], kicker: 'THREAT INTELLIGENCE CONTEXT', title: 'An alert needs<br>context.', description: 'Indicators can be enriched with reputation and exposure intelligence from VirusTotal, AlienVault OTX, AbuseIPDB and Shodan.', tags: ['VIRUSTOTAL', 'OTX', 'ABUSEIPDB'] },
+  { mode: 'RESPOND', metrics: ['POLICY', 'REVIEW', 'ACTION'], kicker: 'RESPONSE ENGINEERING ROADMAP', title: 'From signal<br>to decision.', description: 'EyeGuard explores policy-driven incident response through connector-based workflows. These are architectural concepts, not claims of live automated production containment.', tags: ['RESPONSE POLICY', 'INTEGRATIONS', 'RESEARCH'] }
+];
+let stageIndex = 0;
+function setStage(i) {
+  stageIndex = i; const s = states[i];
+  $('#socModeText').textContent = s.mode;
+  ['#metricOne', '#metricTwo', '#metricThree'].forEach((id, j) => $(id).textContent = s.metrics[j]);
+  $('#researchKicker').textContent = s.kicker; $('#researchTitle').innerHTML = s.title; $('#researchDescription').textContent = s.description;
+  $('#researchTags').replaceChildren(...s.tags.map(t => { const el = document.createElement('span'); el.textContent = t; return el; }));
+  $$('.soc-switch,.stage').forEach(button => { const selected = Number(button.dataset.index) === i; button.classList.toggle('active', selected); button.setAttribute('aria-selected', String(selected)); button.tabIndex = selected ? 0 : -1; });
+  startRadar();
+  document.dispatchEvent(new CustomEvent('portfolio:stage', { detail: { index: i } }));
+}
+$$('[role="tablist"]').forEach((list, group) => {
+  const tabs = $$('[role="tab"]', list);
+  tabs.forEach((button, i) => {
+    button.id = `workflow-${group}-${i}`; button.setAttribute('aria-controls', 'researchDetail');
+    button.addEventListener('click', () => setStage(i));
+    button.addEventListener('keydown', e => {
+      let target;
+      if (e.key === 'ArrowRight' || e.key === 'ArrowDown') target = (i + 1) % tabs.length;
+      if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') target = (i + tabs.length - 1) % tabs.length;
+      if (e.key === 'Home') target = 0;
+      if (e.key === 'End') target = tabs.length - 1;
+      if (target !== undefined) { e.preventDefault(); setStage(target); tabs[target].focus(); }
+    });
+  });
+});
+$('#researchDetail').setAttribute('aria-live', 'polite');
+
+// An illustrative globe, drawn from points in 3D and projected to canvas.
+const radarCanvas = $('#networkVisual');
+const radarContext = radarCanvas.getContext('2d');
+let radarVisible = false, radarFrame = 0, radarTime = 0, radarLast = 0;
+const nodes = Array.from({ length: 105 }, (_, i) => { const y = 1 - (i / 104) * 2; const radius = Math.sqrt(1 - y * y), a = i * 2.39996; return [Math.cos(a) * radius, y, Math.sin(a) * radius]; });
+function startRadar() { if (!radarFrame && radarVisible && !document.hidden) radarFrame = requestAnimationFrame(drawRadar); }
+function drawRadar(ms) {
+  radarFrame = 0; if (!radarVisible || document.hidden || !radarContext) return;
+  const dt = radarLast ? Math.min(ms - radarLast, 100) : 16; radarLast = ms;
+  if (playing) radarTime += dt * .00012;
+  const d = Math.min(devicePixelRatio || 1, 1.5), w = radarCanvas.clientWidth, h = radarCanvas.clientHeight;
+  if (radarCanvas.width !== Math.round(w * d) || radarCanvas.height !== Math.round(h * d)) { radarCanvas.width = Math.round(w * d); radarCanvas.height = Math.round(h * d); }
+  const ctx = radarContext; ctx.setTransform(d, 0, 0, d, 0, 0); ctx.clearRect(0, 0, w, h);
+  const cx = w * .51, cy = h * .53, r = h * .43;
+  const glow = ctx.createRadialGradient(cx, cy, 0, cx, cy, r * 1.3); glow.addColorStop(0, 'rgba(74,33,139,.35)'); glow.addColorStop(.8, 'rgba(73,231,208,.055)'); glow.addColorStop(1, 'transparent'); ctx.fillStyle = glow; ctx.fillRect(0, 0, w, h);
+  ctx.strokeStyle = 'rgba(134,214,223,.12)'; ctx.lineWidth = .6;
+  for (let i = -2; i <= 2; i++) { ctx.beginPath(); ctx.ellipse(cx, cy, r * Math.cos(i * .38), r, 0, 0, Math.PI * 2); ctx.stroke(); }
+  for (let i = -2; i <= 2; i++) { ctx.beginPath(); ctx.ellipse(cx, cy + i * r * .29, Math.sqrt(r * r - (i * r * .29) ** 2), r * .15, 0, 0, Math.PI * 2); ctx.stroke(); }
+  const points = nodes.map(([x, y, z], i) => { const x1 = x * Math.cos(radarTime) - z * Math.sin(radarTime), z1 = x * Math.sin(radarTime) + z * Math.cos(radarTime); return { x: cx + x1 * r, y: cy + y * r, z: z1, i }; });
+  for (const p of points) {
+    if (p.z < -.15) continue;
+    const active = (p.i + stageIndex) % 9 === 0;
+    ctx.fillStyle = active ? '#b27dff' : `rgba(129,255,225,${.25 + p.z * .65})`;
+    ctx.beginPath(); ctx.arc(p.x, p.y, active ? 2.1 : 1, 0, Math.PI * 2); ctx.fill();
+    if (active) {
+      const target = points[(p.i + 18) % points.length]; if (target.z < -.15) continue;
+      ctx.strokeStyle = p.i % 2 ? 'rgba(141,84,238,.6)' : 'rgba(121,255,218,.4)'; ctx.lineWidth = .8;
+      ctx.beginPath(); ctx.moveTo(p.x, p.y); ctx.quadraticCurveTo(cx, cy - r * 1.05, target.x, target.y); ctx.stroke();
+      ctx.strokeStyle = 'rgba(143,96,255,.15)'; ctx.beginPath(); ctx.arc(p.x, p.y, 5 + Math.sin(radarTime * 9 + p.i) * 2, 0, Math.PI * 2); ctx.stroke();
+    }
+  }
+  if (playing) radarFrame = requestAnimationFrame(drawRadar);
+}
+new IntersectionObserver(([e]) => { radarVisible = e.isIntersecting; if (radarVisible) startRadar(); else { cancelAnimationFrame(radarFrame); radarFrame = 0; radarLast = 0; } }).observe(radarCanvas);
+addEventListener('visibilitychange', () => { if (document.hidden) { cancelAnimationFrame(radarFrame); radarFrame = 0; radarLast = 0; } else startRadar(); });
+
+// Genuine 4D rotations, followed by perspective projection 4D -> 3D -> 2D.
+const vertices = Array.from({ length: 16 }, (_, i) => [i & 1 ? 1 : -1, i & 2 ? 1 : -1, i & 4 ? 1 : -1, i & 8 ? 1 : -1]);
+const edges = []; for (let i = 0; i < 16; i++) for (let j = i + 1; j < 16; j++) { const d = i ^ j; if ((d & (d - 1)) === 0) edges.push([i, j]); }
+function project(t, rx, ry) {
+  return vertices.map(vertex => {
+    const p = [...vertex];
+    for (const [a, b, angle] of [[0, 3, t * .4 + rx], [1, 2, t * .27 + ry], [2, 3, t * .18]]) { const x = p[a], y = p[b]; p[a] = x * Math.cos(angle) - y * Math.sin(angle); p[b] = x * Math.sin(angle) + y * Math.cos(angle); }
+    const d4 = 3.4 / (3.4 - p[3]); const [x, y, z] = p.slice(0, 3).map(v => v * d4); const d3 = 7 / (7 - z);
+    return [x * d3, y * d3, z];
+  });
+}
+const modal = $('#dimensionModal'), canvas4 = $('#dimensionCanvas'), context4 = canvas4.getContext('2d');
+let dimFrame = 0, dimTime = 0, dimLast = 0, dimPlaying = !reduced.matches, rotX = .3, rotY = .15, dragging = false, lastX = 0, lastY = 0;
+function dimDraw(ms) {
+  dimFrame = 0; if (!modal.open || document.hidden) return;
+  if (dimLast && dimPlaying) dimTime += Math.min(ms - dimLast, 80) * .001 * Number($('#speedRange').value); dimLast = ms;
+  const w = canvas4.clientWidth, h = canvas4.clientHeight, d = Math.min(devicePixelRatio || 1, 1.7);
+  if (canvas4.width !== Math.round(w * d) || canvas4.height !== Math.round(h * d)) { canvas4.width = Math.round(w * d); canvas4.height = Math.round(h * d); }
+  const ctx = context4; ctx.setTransform(d, 0, 0, d, 0, 0); ctx.clearRect(0, 0, w, h);
+  const points = project(dimTime, rotX, rotY), scale = Math.min(w, h) * .15;
+  for (let i = 0; i < edges.length; i++) { const [a, b] = edges[i], u = points[a], v = points[b]; ctx.strokeStyle = i % 3 ? '#83ffe0' : '#b178ff'; ctx.shadowColor = ctx.strokeStyle; ctx.shadowBlur = 10; ctx.lineWidth = 1.3; ctx.beginPath(); ctx.moveTo(w / 2 + u[0] * scale, h / 2 + u[1] * scale); ctx.lineTo(w / 2 + v[0] * scale, h / 2 + v[1] * scale); ctx.stroke(); }
+  ctx.shadowBlur = 0;
+  points.forEach(([x, y]) => { ctx.fillStyle = '#e0fff6'; ctx.beginPath(); ctx.arc(w / 2 + x * scale, h / 2 + y * scale, 2.5, 0, Math.PI * 2); ctx.fill(); });
+  if (dimPlaying) dimFrame = requestAnimationFrame(dimDraw);
+}
+function requestDim() { if (!dimFrame && modal.open) dimFrame = requestAnimationFrame(dimDraw); }
+function updateDimPause() { $('#dimensionPause').setAttribute('aria-pressed', String(!dimPlaying)); $('#dimensionPause').textContent = dimPlaying ? 'PAUSE Ⅱ' : 'PLAY ▷'; requestDim(); }
+$('#dimensionButton').addEventListener('click', () => {
+  modalWasPlaying = playing; playing = false; updateMotion(); modal.showModal(); dimLast = 0; updateDimPause(); $('#dimensionClose').focus();
+  document.dispatchEvent(new CustomEvent('portfolio:modal', { detail: { open: true } }));
+});
+$('#dimensionClose').addEventListener('click', () => modal.close());
+modal.addEventListener('close', () => { cancelAnimationFrame(dimFrame); dimFrame = 0; playing = modalWasPlaying; updateMotion(); document.dispatchEvent(new CustomEvent('portfolio:modal', { detail: { open: false } })); $('#dimensionButton').focus(); });
+modal.addEventListener('click', e => { if (e.target === modal) modal.close(); });
+$('#dimensionPause').addEventListener('click', () => { dimPlaying = !dimPlaying; updateDimPause(); });
+$('#speedRange').addEventListener('input', e => { $('#speedValue').textContent = `${Number(e.target.value).toFixed(1)}×`; requestDim(); });
+$('#dimensionReset').addEventListener('click', () => { rotX = .3; rotY = .15; dimTime = 0; $('#speedRange').value = '1'; $('#speedValue').textContent = '1.0×'; requestDim(); });
+canvas4.addEventListener('pointerdown', e => { dragging = true; lastX = e.clientX; lastY = e.clientY; canvas4.setPointerCapture(e.pointerId); });
+canvas4.addEventListener('pointermove', e => { if (!dragging) return; rotX += (e.clientX - lastX) * .007; rotY += (e.clientY - lastY) * .007; lastX = e.clientX; lastY = e.clientY; requestDim(); });
+canvas4.addEventListener('pointerup', () => dragging = false); canvas4.addEventListener('pointercancel', () => dragging = false);
+new ResizeObserver(requestDim).observe(canvas4);
+addEventListener('visibilitychange', () => { if (!document.hidden) { dimLast = 0; requestDim(); } });
+setStage(0); updateMotion();
+document.documentElement.dataset.ready = 'true';

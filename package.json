@@ -1,0 +1,16 @@
+{
+  "name": "wael-eldabah-portfolio",
+  "version": "6.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "node scripts/build.mjs",
+    "serve": "python -m http.server 8000"
+  },
+  "dependencies": {
+    "three": "0.180.0"
+  },
+  "devDependencies": {
+    "esbuild": "0.25.10"
+  }
+}

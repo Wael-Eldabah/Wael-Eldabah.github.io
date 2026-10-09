@@ -1,32 +1,54 @@
-# Wael El-Dabah — Obsidian / Violet / Mint
+# Wael El-Dabah — Living Obsidian
 
-A custom-built, screen-faithful personal portfolio based on the specific user-approved concept reference. The reference is an art-direction illustration: its central cinematic stone artwork and EyeGuard orb are separately optimized for the site, with all actual text, cards, navigation, buttons, badges and project details implemented as accessible HTML. No screenshot of the entire page is used as a fake interface.
+Wael's personal portfolio, with an obsidian, violet and mint visual direction based on the supplied cinematic reference. The interface is real, selectable HTML. The landscape, foreground sculpture, portrait, typography and controls are independent layers.
 
-## Features
+## Visual system
 
-- Responsive artwork-led hero with carefully layered cinematic stone plate, neon orbital rings, translucent geometric frames, live WebGL four-dimensional projection, and subtle cursor parallax.
-- 4D experiment: real tesseract geometry with 16 vertices and 32 edges, 4D XW/YZ/ZW rotational planes, pointer-driven orientation and adjustable rotation speed.
-- EyeGuard case study with four linked interactive stages and a synthetic graphical radar — no live telemetry or fabricated numeric claims.
-- Three tailored CV PDFs (Industry, Research, Academic), each with View and Download.
-- Animated scroll reveals, section transition wipes, reduced-motion option through OS settings, offscreen-aware animation throttling.
-- Zero runtime framework dependencies; browser-native WebGL and Canvas, with a static art fallback.
+- A Three.js WebGL2 sculpture made of irregular stone blocks, transmissive glass, luminous seams, floating fragments and orbital lights. Pointer movement changes the camera-facing orientation; **Disperse** separates the pieces and **Reassemble** brings them back.
+- A separate faceted EyeGuard crystal with a luminous iris and moving orbital lights. The small dashboard is an illustrative network visualization, not live security telemetry.
+- An alpha-preserving, quarter-resolution bloom pass, ACES tone mapping and image-based lighting.
+- On devices without WebGL2, clean transparent artwork is combined with independently animated front/back orbital paths, particles and pointer parallax. This is a layered-art compatibility mode, not physically rendered 3D. The unavailable Disperse control is hidden.
+- A separate interactive **4D dimension study**: 16 vertices and 32 edges, genuine rotations in four dimensions, then projection into 3D and 2D. Drag, speed, pause and reset controls are available.
+- Responsive navigation, keyboard-operable research tabs, native modal focus handling, visible focus styles, a global motion control and `prefers-reduced-motion` support.
 
-## Profile photography
+## Connected chapters
 
-The reference screenshot depicts an **illustrative person**, not necessarily the site owner. The portfolio uses the account owner's public GitHub avatar as a temporary portrait. Replace this with the owner's actual high-resolution portrait as soon as they provide one; do not imply the generated reference face is the owner.
+The sticky navigation and next-section control use native smooth anchor scrolling. Scroll motion stays under the visitor’s control; there is no forced auto-advance or wheel interception. A short light sweep, progressive reveals, reflective cards, a continuous geometric atmosphere, a moving experience timeline and a living research core connect the sections. Both the hero and persistent control can pause the site.
 
-## Run locally
+Certification cards show the official INE eJPT badge and official Huawei issuer logo, with native detail dialogs. Degree and competition artwork are editorial symbols, not fabricated certificate scans. The CV cards preview the actual first page of each linked PDF.
 
-Use a local static server, e.g. `python -m http.server 8000` from the repository root, and open `http://localhost:8000`.
+## Develop
 
-## Deploy
+Requires Node.js 20+ and Python 3 for the example static server.
 
-GitHub Pages from branch `main`, root folder. Expected site address: <https://wael-eldabah.github.io/>.
+```sh
+npm ci
+npm run build
+npm run serve
+```
 
-## Content accuracy
+Open `http://localhost:8000`. `src/scene.js` is the editable Three.js source. `npm run build` produces the self-contained browser module in `dist/scene.js` and copies the Three.js MIT license. Commit the built files when changing the scene; GitHub Pages does not run a Node build.
 
-EyeGuard is presented as a passive network detection and response *research project*, not a camera system or production product. Certifications: eJPT and HCIA-Security are represented as earned based on the account owner's confirmation; CEH is not misrepresented as an earned certification. All dashboard visuals are illustrative, not real security monitoring.
+The rest of the site is plain HTML, CSS and browser-native JavaScript. Dependencies are pinned in `package-lock.json`; no runtime CDN import is needed for Three.js.
 
-## Quality safeguards
+## Performance behavior
 
-The 3D object is rendered via native WebGL, and the optional lab displays a separate mathematically projected 4D hypercube. Motion is suppressed when the user requests reduced motion. For a future photorealistic native 3D object, replace the artwork with an optimized GLB model and add a lightweight WebGL model loader only after testing the tradeoff on mobile.
+The page is readable before the 3D module loads. The module is deferred until idle (with a short timeout). WebGL resolution is capped at 1.5 device pixels per CSS pixel on desktop and 1.2 on mobile, then reduced when measured rendering speed stays low. Bloom uses quarter-size render targets. Scenes stop requesting frames when offscreen, when the tab is hidden, while the 4D dialog is open, or when paused. The layered-art renderer caps its animation cadence near 30 fps. These are implementation limits, not guarantees of any particular device's frame rate.
+
+## Assets and content
+
+- `assets/cinematic-environment.webp`: generated text-free environment artwork, optimized to WebP.
+- `assets/obsidian-sculpture.webp` and `assets/eyeguard-crystal.webp`: generated transparent compatibility artwork, based on the supplied visual direction. They contain no baked interface text.
+- `assets/wael-cinematic-portrait.webp`: a cinematic photographic edit of the personal portrait supplied by the owner, with graphite, mint and violet studio lighting. The generated concept person is not used as the owner.
+- Google Fonts provides Bodoni Moda, DM Sans, DM Mono and Allura, with system fallbacks.
+- Existing portfolio content and the three Industry, Research and Academic CV PDFs are retained. Dashboard states are illustrative. Certifications and experience are not independently re-verified by this visual redesign.
+
+## Deployment and validation
+
+The site is served by GitHub Pages from the root of `main`: <https://wael-eldabah.github.io/>.
+
+Validation includes the production build, JavaScript syntax, local links/anchors and browser checks for responsive layout, research controls, navigation, pause and the 4D dialog. The available cloud browser disables WebGL, so browser visual checks cover the animated layered-art compatibility mode and Canvas2D interactions. The actual PBR shader output, GPU frame rate and physical iOS/Android behavior still require a WebGL-enabled device; no Lighthouse score or GPU benchmark is claimed.
+
+Official asset sources: [INE eJPT](https://ine.com/security/certifications/ejpt-certification), [Huawei](https://www.huawei.com/en/). Credential program links point to issuer information, not personal credential verification.
+
+Three.js documentation: [physical materials](https://threejs.org/docs/pages/MeshPhysicalMaterial.html) and [responsive rendering](https://threejs.org/manual/en/responsive.html).
