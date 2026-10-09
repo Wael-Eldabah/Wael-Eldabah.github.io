@@ -2,6 +2,10 @@
 
 Checked 2026-10-09 in the available cloud Chrome browser.
 
+GitHub Pages deployment for `c1d739e0f249565c943f1ac4f001552b360057ee` completed successfully. The root URL was reopened and showed build `living-obsidian-v6.1`, loaded images and no horizontal overflow. The credential reveal correction was also checked on the live site.
+
+![Deployed desktop, animated layered-art renderer](desktop-v6.1.jpg)
+
 ## Observed
 
 - Desktop sections were inspected: introduction, EyeGuard, credentials, approach, research, experience, CV and contact.
