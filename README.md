@@ -8,7 +8,7 @@ Wael's personal portfolio, with an obsidian, violet and mint visual direction ba
 - A separate faceted EyeGuard crystal with a luminous iris and moving orbital lights. The small dashboard is an illustrative network visualization, not live security telemetry.
 - An alpha-preserving, quarter-resolution bloom pass, ACES tone mapping and image-based lighting.
 - On devices without WebGL2, clean transparent artwork is combined with independently animated front/back orbital paths, particles and pointer parallax. This is a layered-art compatibility mode, not physically rendered 3D. The unavailable Disperse control is hidden.
-- A separate interactive **4D dimension study**: 16 vertices and 32 edges, genuine rotations in four dimensions, then projection into 3D and 2D. Drag, speed, pause and reset controls are available.
+- **Enter the scene** opens an immersive view of the same solid obsidian sculpture. It replaces the earlier wireframe dimension study. The WebGL view supports rotation of real stone geometry; the compatibility view supports textured art parallax with independently moving solid rock fragments. Drift speed, light pulse, pause and reset controls are available.
 - Responsive navigation, keyboard-operable research tabs, native modal focus handling, visible focus styles, a global motion control and `prefers-reduced-motion` support.
 
 ## Connected chapters
@@ -33,13 +33,15 @@ The rest of the site is plain HTML, CSS and browser-native JavaScript. Dependenc
 
 ## Performance behavior
 
-The page is readable before the 3D module loads. The module is deferred until idle (with a short timeout). WebGL resolution is capped at 1.5 device pixels per CSS pixel on desktop and 1.2 on mobile, then reduced when measured rendering speed stays low. Bloom uses quarter-size render targets. Scenes stop requesting frames when offscreen, when the tab is hidden, while the 4D dialog is open, or when paused. The layered-art renderer caps its animation cadence near 30 fps. These are implementation limits, not guarantees of any particular device's frame rate.
+The page is readable before the 3D module loads. The module is deferred until idle (with a short timeout). WebGL resolution is capped at 1.5 device pixels per CSS pixel on desktop and 1.2 on mobile, then reduced when measured rendering speed stays low. Bloom uses quarter-size render targets. Background scenes stop requesting frames when offscreen, when the tab is hidden, while the sculpture dialog is open, or when paused. The layered-art renderer caps its animation cadence near 30 fps. These are implementation limits, not guarantees of any particular device's frame rate.
 
 ## Assets and content
 
 - `assets/cinematic-environment.webp`: generated text-free environment artwork, optimized to WebP.
 - `assets/obsidian-sculpture.webp` and `assets/eyeguard-crystal.webp`: generated transparent compatibility artwork, based on the supplied visual direction. They contain no baked interface text.
 - `assets/wael-cinematic-portrait.webp`: a cinematic photographic edit of the personal portrait supplied by the owner, with graphite, mint and violet studio lighting. The generated concept person is not used as the owner.
+- `assets/obsidian-shard.webp`: a generated transparent, opaque rock sprite for independently animated fragments and the site atmosphere. Built-in ImageGen prompt: one irregular photoreal basalt shard, detailed stone faces, violet mineral fissure, subtle mint rim, transparent background, no text or wireframe.
+- `assets/mark.svg`: a filled monogram outlined from Bodoni Moda, used consistently in the header, footer and contact scene.
 - Google Fonts provides Bodoni Moda, DM Sans, DM Mono and Allura, with system fallbacks.
 - Existing portfolio content and the three Industry, Research and Academic CV PDFs are retained. Dashboard states are illustrative. Certifications and experience are not independently re-verified by this visual redesign.
 
@@ -47,7 +49,7 @@ The page is readable before the 3D module loads. The module is deferred until id
 
 The site is served by GitHub Pages from the root of `main`: <https://wael-eldabah.github.io/>.
 
-Validation includes the production build, JavaScript syntax, local links/anchors and browser checks for responsive layout, research controls, navigation, pause and the 4D dialog. The available cloud browser disables WebGL, so browser visual checks cover the animated layered-art compatibility mode and Canvas2D interactions. The actual PBR shader output, GPU frame rate and physical iOS/Android behavior still require a WebGL-enabled device; no Lighthouse score or GPU benchmark is claimed.
+Validation includes the production build, JavaScript syntax, local links/anchors and browser checks for responsive layout, research controls, navigation, pause and the sculpture dialog. The available cloud browser disables WebGL, so browser visual checks cover the animated layered-art compatibility mode and Canvas2D interactions. The actual PBR shader output, GPU frame rate and physical iOS/Android behavior still require a WebGL-enabled device; no Lighthouse score or GPU benchmark is claimed.
 
 Official asset sources: [INE eJPT](https://ine.com/security/certifications/ejpt-certification), [Huawei](https://www.huawei.com/en/). Credential program links point to issuer information, not personal credential verification.
 

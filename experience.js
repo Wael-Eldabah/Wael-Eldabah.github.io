@@ -103,6 +103,7 @@ credentialModal.addEventListener('close', () => {
 // A low-resolution atmosphere: projected geometric fragments, dust, and signal paths.
 // It sits behind the HTML; it never captures pointer or keyboard input.
 const canvas = $('#atmosphereCanvas'), ctx = canvas.getContext('2d');
+const ambientRock = new Image(); ambientRock.src = 'assets/obsidian-shard.webp'; ambientRock.addEventListener('load', requestAmbient);
 let frame = 0, lastTime = 0, time = 0, width = 1, height = 1, ratio = 1;
 const particles = Array.from({ length: 52 }, (_, i) => ({ x: ((i * .61803398875) % 1), y: ((i * .41421356237) % 1), depth: .3 + (i % 7) / 10, phase: i * 2.39996 }));
 function resizeAtmosphere() {
@@ -126,13 +127,11 @@ function drawAtmosphere(ms) {
     ctx.fillStyle = `rgba(${p.depth > .65 ? '178,142,255' : '148,235,216'},${alpha})`;
     ctx.fillRect(x, y, p.depth > .7 ? 1.6 : .8, p.depth > .7 ? 1.6 : .8);
   }
-  for (let j = 0; j < 3; j++) {
-    const cx = width * [.91, .075, .73][j], cy = height * [.35, .76, .93][j] + Math.sin(t * .13 + j) * 22;
-    const r = Math.min(width * .13, 135) * (1 - j * .12), a = t * .018 + j;
-    const vertices = [[-1,-.62,.3],[.8,-.72,.6],[1,.55,-.4],[-.65,.9,-.2],[.04,.05,1.35]];
-    const points = vertices.map(([x,y,z]) => { const X=x*Math.cos(a)-z*Math.sin(a), Z=x*Math.sin(a)+z*Math.cos(a), d=3/(3-Z); return [cx+X*r*d,cy+y*r*d]; });
-    ctx.strokeStyle = j % 2 ? 'rgba(112,226,198,.13)' : 'rgba(151,117,214,.14)'; ctx.lineWidth = .65;
-    for (const [u,v] of [[0,1],[1,2],[2,3],[3,0],[0,4],[1,4],[2,4],[3,4]]) { ctx.beginPath();ctx.moveTo(...points[u]);ctx.lineTo(...points[v]);ctx.stroke(); }
+  if (ambientRock.complete && ambientRock.naturalWidth) for (let j = 0; j < 3; j++) {
+    const cx = width * [.93,.055,.77][j], cy = height * [.35,.76,.94][j] + Math.sin(t*.2+j)*19;
+    const size = Math.min(width*.24,245) * (1-j*.14);
+    ctx.save(); ctx.translate(cx,cy); ctx.rotate(t*.017+j*2.1); ctx.globalAlpha = .13;
+    ctx.drawImage(ambientRock,-size/2,-size/2,size,size); ctx.restore();
   }
   if (motion) requestAmbient();
 }

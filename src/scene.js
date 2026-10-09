@@ -9,6 +9,11 @@ let paused = reduceMotion.matches;
 let spread = false;
 let modalOpen = false;
 const scenes = [];
+let focusView;
+const focusControls = { open: false, playing: !reduceMotion.matches, speed: 1, rotationX: 0, rotationY: 0, pulse: 0 };
+const rockSprite = new Image();
+rockSprite.src = new URL('../assets/obsidian-shard.webp', import.meta.url).href;
+rockSprite.addEventListener('load', () => { for (const view of scenes) view.requestFrame(); focusView?.requestFrame(); });
 
 function random(seed) {
   let n = seed;
@@ -101,7 +106,8 @@ class GlowPipeline {
 }
 
 class SceneView {
-  constructor(canvas, type) {
+  constructor(canvas, type, focus = false) {
+    this.focus = focus;
     this.canvas = canvas; this.type = type; this.time = 0; this.visible = false; this.lost = false; this.frame = 0; this.prev = 0; this.frames = 0; this.sampleStart = 0; this.samples = 0; this.fps = 0;
     this.mobile = matchMedia('(max-width: 720px)').matches;
     this.pixelRatio = Math.min(devicePixelRatio || 1, this.mobile ? 1.2 : 1.5);
@@ -124,7 +130,7 @@ class SceneView {
     this.observer = new IntersectionObserver(([entry]) => { this.visible = entry.isIntersecting; if (this.visible) this.requestFrame(); else this.stop(); }, { rootMargin: '60px', threshold: 0 }); this.observer.observe(canvas);
     canvas.addEventListener('webglcontextlost', e => { e.preventDefault(); this.lost = true; this.stop(); canvas.parentElement.classList.remove('scene-ready'); canvas.dataset.state = 'fallback'; });
     canvas.addEventListener('webglcontextrestored', () => { this.lost = false; canvas.parentElement.classList.add('scene-ready'); this.requestFrame(); });
-    canvas.parentElement.classList.add('scene-ready'); canvas.dataset.state = 'webgl'; scenes.push(this);
+    canvas.parentElement.classList.add('scene-ready'); canvas.dataset.state = 'webgl'; if (!focus) scenes.push(this);
   }
   buildHero() {
     const stone = new THREE.MeshStandardMaterial({ color: 0x565a63, map: bumpMap, bumpMap, bumpScale: .11, metalness: .48, roughness: .43, envMapIntensity: 1.2 });
@@ -207,19 +213,21 @@ class SceneView {
     this.camera.updateProjectionMatrix(); this.pipeline?.resize(Math.round(this.width * this.pixelRatio), Math.round(this.height * this.pixelRatio));
   }
   stop() { cancelAnimationFrame(this.frame); this.frame = 0; this.prev = 0; this.sampleStart = 0; this.frames = 0; }
-  requestFrame() { if (!this.frame && !this.lost && !modalOpen && !document.hidden) this.frame = requestAnimationFrame(t => this.draw(t)); }
+  requestFrame() { if (!this.frame && !this.lost && (this.focus ? focusControls.open : !modalOpen) && !document.hidden) this.frame = requestAnimationFrame(t => this.draw(t)); }
   draw(ms) {
-    this.frame = 0; if (this.lost || document.hidden || !this.visible) return;
-    const dt = this.prev ? Math.min((ms - this.prev) / 1000, .08) : .016; this.prev = ms;
+    this.frame = 0; if (this.lost || document.hidden || !this.visible || (this.focus && !focusControls.open)) return;
+    const paused = this.focus ? !focusControls.playing : !getSiteMotion();
+    const spread = this.focus ? false : getSiteSpread();
+    const dt = (this.prev ? Math.min((ms - this.prev) / 1000, .08) : .016) * (this.focus ? focusControls.speed : 1); this.prev = ms;
     if (!paused) this.time += dt;
     const t = this.time;
     if (this.type === 'hero') {
       this.explosion = reduceMotion.matches ? (spread ? 1 : 0) : THREE.MathUtils.lerp(this.explosion, spread ? 1 : 0, 1 - Math.exp(-dt * 3));
-      this.group.rotation.y = -.54 + Math.sin(t * .2) * .13 + pointer.x * .16;
-      this.group.rotation.x = .18 + Math.cos(t * .21) * .035 + pointer.y * .1;
+      this.group.rotation.y = -.54 + Math.sin(t * .2) * .13 + (this.focus ? focusControls.rotationY : pointer.x * .16);
+      this.group.rotation.x = .18 + Math.cos(t * .21) * .035 + (this.focus ? focusControls.rotationX : pointer.y * .1);
       this.group.rotation.z = -.075 + Math.sin(t * .18) * .025;
       this.group.position.y = .14 + Math.sin(t * .65) * .09;
-      for (const p of this.parts) { p.mesh.position.copy(p.base).addScaledVector(p.direction, this.explosion * .9 + Math.sin(t * .7 + p.phase) * .013); }
+      for (const p of this.parts) { p.mesh.position.copy(p.base).addScaledVector(p.direction, this.explosion * .9 + Math.sin(t * .7 + p.phase) * .018 + (this.focus ? focusControls.pulse * .25 : 0)); }
       this.core.rotation.y = t * .16; this.ringGroup.rotation.y = Math.sin(t * .13) * .1;
       this.coreMaterial.emissiveIntensity = 1.55 + Math.sin(t * 1.15) * .24;
       this.dust.rotation.y = t * .015;
@@ -229,7 +237,8 @@ class SceneView {
     }
     for (const gem of this.gems) { gem.mesh.position.copy(gem.base); gem.mesh.position.y += Math.sin(t * .75 + gem.phase) * .09; gem.mesh.rotation.x += paused ? 0 : dt * .045; gem.mesh.rotation.y += paused ? 0 : dt * .08; }
     for (const o of this.orbits) { const a = t * .4 + o.phase; o.bead.position.set(Math.cos(a) * o.radius, Math.sin(a) * o.radius * o.flatten, 0); }
-    this.light.intensity = 35 + Math.sin(t * 1.5) * 8;
+    this.light.intensity = 35 + Math.sin(t * 1.5) * 8 + (this.focus ? focusControls.pulse * 28 : 0);
+    if (this.focus && !paused) focusControls.pulse *= Math.exp(-dt * 1.5);
     this.pipeline.render(this.scene, this.camera);
     this.frames++; if (!this.sampleStart) this.sampleStart = ms;
     if (ms - this.sampleStart > 1800) {
@@ -243,7 +252,8 @@ class SceneView {
 // Progressive fallback: transparent art + independently projected 3D orbital
 // paths and pointer parallax. This is intentionally labelled layered art, not PBR.
 class LayeredArtView {
-  constructor(canvas, type) {
+  constructor(canvas, type, focus = false) {
+    this.focus = focus;
     this.canvas = canvas; this.type = type; this.time = 0; this.frame = 0; this.prev = 0; this.visible = false; this.frames = 0; this.sampleStart = 0;
     this.image = canvas.parentElement.querySelector('.scene-fallback');
     this.context = canvas.getContext('2d');
@@ -255,22 +265,24 @@ class LayeredArtView {
     this.canvas.setAttribute('aria-label', type === 'hero' ? 'Animated obsidian artwork with independent orbital lights and pointer parallax' : 'Animated EyeGuard crystal artwork with orbital lights');
     this.resizeObserver = new ResizeObserver(() => { this.resize(); this.requestFrame(); }); this.resizeObserver.observe(this.canvas);
     this.observer = new IntersectionObserver(([entry]) => { this.visible = entry.isIntersecting; if (this.visible) this.requestFrame(); else this.stop(); }, { rootMargin: '50px' }); this.observer.observe(this.canvas);
-    this.resize(); scenes.push(this);
+    this.resize(); if (!focus) scenes.push(this);
   }
   resize() {
     const r = this.canvas.getBoundingClientRect(); this.w = r.width; this.h = r.height; this.ratio = Math.min(devicePixelRatio || 1, 1.5);
     for (const c of [this.canvas, this.back]) { c.width = Math.round(this.w * this.ratio); c.height = Math.round(this.h * this.ratio); }
   }
   stop() { cancelAnimationFrame(this.frame); this.frame = 0; this.prev = 0; this.frames = 0; this.sampleStart = 0; }
-  requestFrame() { if (!this.frame && !modalOpen && !document.hidden) this.frame = requestAnimationFrame(t => this.draw(t)); }
+  requestFrame() { if (!this.frame && (this.focus ? focusControls.open : !modalOpen) && !document.hidden) this.frame = requestAnimationFrame(t => this.draw(t)); }
   draw(ms) {
-    this.frame = 0; if (!this.visible || document.hidden) return;
+    this.frame = 0; if (!this.visible || document.hidden || (this.focus && !focusControls.open)) return;
+    const paused = this.focus ? !focusControls.playing : !getSiteMotion();
+    const pointer = this.focus ? { x: clamp(focusControls.rotationY, -1.4, 1.4), y: clamp(focusControls.rotationX, -.9, .9) } : getSitePointer();
     if (!paused && this.prev && ms - this.prev < 32) { this.requestFrame(); return; }
-    const dt = this.prev ? Math.min(ms - this.prev, 80) : 16; this.prev = ms; if (!paused) this.time += dt * .001;
+    const dt = (this.prev ? Math.min(ms - this.prev, 80) : 16) * (this.focus ? focusControls.speed : 1); this.prev = ms; if (!paused) this.time += dt * .001;
     const t = this.time, w = this.w, h = this.h, cx = w * .5 + pointer.x * 5, cy = h * .49 + Math.sin(t * .7) * 4;
     const rx = this.type === 'hero' ? Math.min(w * .475, h * .65) : Math.min(w * .47, h * .67);
     for (const c of [this.context, this.backContext]) { c.setTransform(this.ratio, 0, 0, this.ratio, 0, 0); c.clearRect(0, 0, w, h); }
-    if (this.image) this.image.style.transform = `translate3d(${pointer.x * -7}px,${Math.sin(t * .7) * 5}px,0) rotate(${Math.sin(t * .18) * .65}deg)`;
+    if (this.image) this.image.style.transform = `perspective(900px) translate3d(${pointer.x * -12}px,${Math.sin(t * .7) * 6}px,0) rotateX(${pointer.y * -8}deg) rotateY(${pointer.x * 10}deg) rotateZ(${Math.sin(t * .18) * .8}deg)`;
     for (let ring = 0; ring < 3; ring++) {
       const tilt = [-.34, .24, -.12][ring] + Math.sin(t * .18 + ring) * .025;
       const ry = rx * [.21, .2, .3][ring];
@@ -283,13 +295,27 @@ class LayeredArtView {
       const a = (t * .36 + ring * 2.1) % (2 * Math.PI), p = point(a), c = a >= Math.PI ? this.context : this.backContext;
       const g = c.createRadialGradient(p[0], p[1], 0, p[0], p[1], 14); g.addColorStop(0, '#ffffff'); g.addColorStop(.1, color); g.addColorStop(.35, color + '60'); g.addColorStop(1, color + '00'); c.fillStyle = g; c.fillRect(p[0] - 14, p[1] - 14, 28, 28);
     }
+    // Textured solid fragments, with independent depth, rotation and drift.
+    if (this.type === 'hero' && rockSprite.complete && rockSprite.naturalWidth) {
+      const radius = Math.min(w * .39, h * .44);
+      for (let i = 0; i < 5; i++) {
+        const angle = i * 2.39996 + t * .045, z = Math.sin(angle + .8), depth = 2.8 / (2.8 - z * .5);
+        const c = z > 0 ? this.context : this.backContext;
+        const pulse = this.focus ? focusControls.pulse : 0;
+        const x = cx + Math.cos(angle) * radius * (1.04 + pulse * .18) * depth + pointer.x * z * 12;
+        const y = cy + Math.sin(angle) * radius * .79 * depth + Math.sin(t * .5 + i) * 9;
+        const size = radius * (.19 + (i % 3) * .035) * depth;
+        c.save(); c.translate(x,y); c.rotate(i * 1.7 + t * (i % 2 ? .075 : -.055)); c.globalAlpha = z > 0 ? .98 : .7;
+        c.drawImage(rockSprite,-size/2,-size/2,size,size); c.restore();
+      }
+    }
     const c = this.context; c.globalAlpha = .35;
     for (let i = 0; i < 25; i++) { const a = i * 2.39996 + t * .015; const px = cx + Math.cos(a) * rx * (1 + Math.sin(i) * .12), py = cy + Math.sin(a) * h * .39; c.fillStyle = i % 3 ? '#aaffdd' : '#b499ff'; c.fillRect(px, py, i % 4 ? 1 : 2, i % 4 ? 1 : 2); }
     c.globalAlpha = 1;
     // Independent light passes breathe over the foreground art, never the text.
     const glowRadius = rx * (this.type === 'hero' ? .32 : .3);
     const glow = c.createRadialGradient(cx, cy, 0, cx, cy, glowRadius);
-    const breath = .05 + (Math.sin(t * 1.15) + 1) * .035;
+    const breath = .05 + (Math.sin(t * 1.15) + 1) * .035 + (this.focus ? focusControls.pulse * .13 : 0);
     glow.addColorStop(0, `rgba(156,85,255,${breath})`); glow.addColorStop(1, 'rgba(108,46,220,0)');
     c.globalCompositeOperation = 'screen'; c.fillStyle = glow; c.fillRect(cx-glowRadius,cy-glowRadius,glowRadius*2,glowRadius*2);
     if (this.type === 'orb') {
@@ -303,6 +329,7 @@ class LayeredArtView {
       });
     }
     c.globalCompositeOperation = 'source-over';
+    if (this.focus && !paused) focusControls.pulse *= Math.exp(-dt * .0015);
     this.frames++; if (!this.sampleStart) this.sampleStart = ms;
     if (ms - this.sampleStart > 1800) { this.canvas.dataset.fps = String(Math.round(this.frames * 1000 / (ms - this.sampleStart))); this.sampleStart = ms; this.frames = 0; }
     if (!paused) this.requestFrame();
@@ -311,6 +338,22 @@ class LayeredArtView {
 
 export function setMotion(playing) { paused = !playing; for (const view of scenes) { view.stop(); view.requestFrame(); } }
 export function setSpread(value) { spread = value; for (const view of scenes) view.requestFrame(); }
+function getSiteMotion() { return !paused; }
+function getSiteSpread() { return spread; }
+function getSitePointer() { return pointer; }
+
+export function openSculpture(canvas) {
+  focusControls.open = true; focusControls.playing = !reduceMotion.matches;
+  if (!focusView) {
+    try { focusView = new SceneView(canvas, 'hero', true); }
+    catch { canvas.parentElement.classList.remove('scene-ready'); focusView = new LayeredArtView(canvas, 'hero', true); }
+  }
+  focusView.resize(); focusView.visible = true; focusView.requestFrame();
+  return { renderer: focusView.canvas.dataset.state, playing: focusControls.playing };
+}
+export function closeSculpture() { focusControls.open = false; focusView?.stop(); }
+export function controlSculpture(values) { Object.assign(focusControls, values); focusView?.stop(); focusView?.requestFrame(); }
+export function resetSculpture() { Object.assign(focusControls, { rotationX: 0, rotationY: 0, speed: 1, pulse: 0 }); focusView?.requestFrame(); }
 export function initScenes() {
   const hero = document.querySelector('#heroCanvas'); const orb = document.querySelector('#orbCanvas');
   for (const [canvas, type] of [[hero, 'hero'], [orb, 'orb']]) {
@@ -320,7 +363,7 @@ export function initScenes() {
   const surface = document.querySelector('#heroArt');
   surface?.addEventListener('pointermove', e => { if (paused || e.pointerType === 'touch') return; const r = surface.getBoundingClientRect(); pointer.x = clamp((e.clientX - r.left) / r.width * 2 - 1, -1, 1); pointer.y = clamp((e.clientY - r.top) / r.height * 2 - 1, -1, 1); });
   surface?.addEventListener('pointerleave', () => { pointer.x = pointer.y = 0; });
-  document.addEventListener('visibilitychange', () => { for (const view of scenes) { view.stop(); if (!document.hidden) view.requestFrame(); } });
+  document.addEventListener('visibilitychange', () => { for (const view of scenes) { view.stop(); if (!document.hidden) view.requestFrame(); } focusView?.stop(); if (!document.hidden) focusView?.requestFrame(); });
   document.addEventListener('portfolio:modal', e => { modalOpen = e.detail.open; for (const view of scenes) { if (modalOpen) view.stop(); else view.requestFrame(); } });
-  reduceMotion.addEventListener('change', () => setMotion(!reduceMotion.matches));
+  reduceMotion.addEventListener('change', () => { setMotion(!reduceMotion.matches); controlSculpture({ playing: !reduceMotion.matches }); });
 }

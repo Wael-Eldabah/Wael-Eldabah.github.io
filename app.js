@@ -27,10 +27,11 @@ $('#disperseButton').addEventListener('click', e => {
   sceneModule?.setSpread(dispersed);
 });
 // Keep the readable HTML and environment available before loading any 3D code.
-const loadScenes = async () => {
-  try { sceneModule = await import('./dist/scene.js?v=6.1'); sceneModule.initScenes(); sceneModule.setMotion(playing); sceneModule.setSpread(dispersed); }
+let scenesPromise;
+const loadScenes = () => scenesPromise ||= (async () => {
+  try { sceneModule = await import('./dist/scene.js?v=7.0'); sceneModule.initScenes(); sceneModule.setMotion(playing); sceneModule.setSpread(dispersed); }
   catch (e) { $('#disperseButton').hidden = true; $('.scene-caption').textContent = 'OBSIDIAN / VIOLET / MINT'; console.warn('Artwork fallback active.', e.message); }
-};
+})();
 if ('requestIdleCallback' in window) requestIdleCallback(loadScenes, { timeout: 600 }); else setTimeout(loadScenes, 60);
 
 $('#year').textContent = new Date().getFullYear();
@@ -122,47 +123,62 @@ function drawRadar(ms) {
 new IntersectionObserver(([e]) => { radarVisible = e.isIntersecting; if (radarVisible) startRadar(); else { cancelAnimationFrame(radarFrame); radarFrame = 0; radarLast = 0; } }).observe(radarCanvas);
 addEventListener('visibilitychange', () => { if (document.hidden) { cancelAnimationFrame(radarFrame); radarFrame = 0; radarLast = 0; } else startRadar(); });
 
-// Genuine 4D rotations, followed by perspective projection 4D -> 3D -> 2D.
-const vertices = Array.from({ length: 16 }, (_, i) => [i & 1 ? 1 : -1, i & 2 ? 1 : -1, i & 4 ? 1 : -1, i & 8 ? 1 : -1]);
-const edges = []; for (let i = 0; i < 16; i++) for (let j = i + 1; j < 16; j++) { const d = i ^ j; if ((d & (d - 1)) === 0) edges.push([i, j]); }
-function project(t, rx, ry) {
-  return vertices.map(vertex => {
-    const p = [...vertex];
-    for (const [a, b, angle] of [[0, 3, t * .4 + rx], [1, 2, t * .27 + ry], [2, 3, t * .18]]) { const x = p[a], y = p[b]; p[a] = x * Math.cos(angle) - y * Math.sin(angle); p[b] = x * Math.sin(angle) + y * Math.cos(angle); }
-    const d4 = 3.4 / (3.4 - p[3]); const [x, y, z] = p.slice(0, 3).map(v => v * d4); const d3 = 7 / (7 - z);
-    return [x * d3, y * d3, z];
-  });
+// The same solid sculpture, isolated from the background site's motion state.
+const modal = $('#dimensionModal'), sculptureStage = $('#sculptureStage');
+let sculpturePlaying = !reduced.matches, sculptureRotation = { x: 0, y: 0 }, sculptureDrag;
+function syncSculptureControl() {
+  $('#dimensionPause').setAttribute('aria-pressed', String(!sculpturePlaying));
+  $('#dimensionPause').textContent = sculpturePlaying ? 'PAUSE Ⅱ' : 'PLAY ▷';
+  $('#sculpturePulse').disabled = !sculpturePlaying;
+  sceneModule?.controlSculpture({ playing: sculpturePlaying });
 }
-const modal = $('#dimensionModal'), canvas4 = $('#dimensionCanvas'), context4 = canvas4.getContext('2d');
-let dimFrame = 0, dimTime = 0, dimLast = 0, dimPlaying = !reduced.matches, rotX = .3, rotY = .15, dragging = false, lastX = 0, lastY = 0;
-function dimDraw(ms) {
-  dimFrame = 0; if (!modal.open || document.hidden) return;
-  if (dimLast && dimPlaying) dimTime += Math.min(ms - dimLast, 80) * .001 * Number($('#speedRange').value); dimLast = ms;
-  const w = canvas4.clientWidth, h = canvas4.clientHeight, d = Math.min(devicePixelRatio || 1, 1.7);
-  if (canvas4.width !== Math.round(w * d) || canvas4.height !== Math.round(h * d)) { canvas4.width = Math.round(w * d); canvas4.height = Math.round(h * d); }
-  const ctx = context4; ctx.setTransform(d, 0, 0, d, 0, 0); ctx.clearRect(0, 0, w, h);
-  const points = project(dimTime, rotX, rotY), scale = Math.min(w, h) * .15;
-  for (let i = 0; i < edges.length; i++) { const [a, b] = edges[i], u = points[a], v = points[b]; ctx.strokeStyle = i % 3 ? '#83ffe0' : '#b178ff'; ctx.shadowColor = ctx.strokeStyle; ctx.shadowBlur = 10; ctx.lineWidth = 1.3; ctx.beginPath(); ctx.moveTo(w / 2 + u[0] * scale, h / 2 + u[1] * scale); ctx.lineTo(w / 2 + v[0] * scale, h / 2 + v[1] * scale); ctx.stroke(); }
-  ctx.shadowBlur = 0;
-  points.forEach(([x, y]) => { ctx.fillStyle = '#e0fff6'; ctx.beginPath(); ctx.arc(w / 2 + x * scale, h / 2 + y * scale, 2.5, 0, Math.PI * 2); ctx.fill(); });
-  if (dimPlaying) dimFrame = requestAnimationFrame(dimDraw);
-}
-function requestDim() { if (!dimFrame && modal.open) dimFrame = requestAnimationFrame(dimDraw); }
-function updateDimPause() { $('#dimensionPause').setAttribute('aria-pressed', String(!dimPlaying)); $('#dimensionPause').textContent = dimPlaying ? 'PAUSE Ⅱ' : 'PLAY ▷'; requestDim(); }
-$('#dimensionButton').addEventListener('click', () => {
-  modalWasPlaying = playing; playing = false; updateMotion(); modal.showModal(); dimLast = 0; updateDimPause(); $('#dimensionClose').focus();
+$('#dimensionButton').addEventListener('click', async () => {
+  modalWasPlaying = playing; playing = false; updateMotion(); modal.showModal();
   document.dispatchEvent(new CustomEvent('portfolio:modal', { detail: { open: true } }));
+  $('#dimensionClose').focus(); sculptureStage.setAttribute('aria-busy','true');
+  await loadScenes();
+  if (!modal.open) return;
+  if (sceneModule) {
+    const state = sceneModule.openSculpture($('#dimensionCanvas'));
+    sculpturePlaying = state.playing;
+    $('#sculptureHint').textContent = state.renderer === 'webgl' ? 'DRAG TO ROTATE · ARROW KEYS TO EXPLORE' : 'DRAG TO SHIFT PERSPECTIVE · ARROW KEYS TO EXPLORE';
+    syncSculptureControl();
+  } else { $('#sculptureHint').textContent = 'OBSIDIAN / VIOLET / MINT'; }
+  sculptureStage.removeAttribute('aria-busy');
 });
 $('#dimensionClose').addEventListener('click', () => modal.close());
-modal.addEventListener('close', () => { cancelAnimationFrame(dimFrame); dimFrame = 0; playing = modalWasPlaying; updateMotion(); document.dispatchEvent(new CustomEvent('portfolio:modal', { detail: { open: false } })); $('#dimensionButton').focus(); });
+modal.addEventListener('close', () => {
+  sceneModule?.closeSculpture(); sculptureDrag = null;
+  document.dispatchEvent(new CustomEvent('portfolio:modal', { detail: { open: false } }));
+  playing = modalWasPlaying; updateMotion(); $('#dimensionButton').focus();
+});
 modal.addEventListener('click', e => { if (e.target === modal) modal.close(); });
-$('#dimensionPause').addEventListener('click', () => { dimPlaying = !dimPlaying; updateDimPause(); });
-$('#speedRange').addEventListener('input', e => { $('#speedValue').textContent = `${Number(e.target.value).toFixed(1)}×`; requestDim(); });
-$('#dimensionReset').addEventListener('click', () => { rotX = .3; rotY = .15; dimTime = 0; $('#speedRange').value = '1'; $('#speedValue').textContent = '1.0×'; requestDim(); });
-canvas4.addEventListener('pointerdown', e => { dragging = true; lastX = e.clientX; lastY = e.clientY; canvas4.setPointerCapture(e.pointerId); });
-canvas4.addEventListener('pointermove', e => { if (!dragging) return; rotX += (e.clientX - lastX) * .007; rotY += (e.clientY - lastY) * .007; lastX = e.clientX; lastY = e.clientY; requestDim(); });
-canvas4.addEventListener('pointerup', () => dragging = false); canvas4.addEventListener('pointercancel', () => dragging = false);
-new ResizeObserver(requestDim).observe(canvas4);
-addEventListener('visibilitychange', () => { if (!document.hidden) { dimLast = 0; requestDim(); } });
+$('#dimensionPause').addEventListener('click', () => { sculpturePlaying = !sculpturePlaying; syncSculptureControl(); });
+$('#speedRange').addEventListener('input', e => {
+  const speed = Number(e.target.value); $('#speedValue').textContent = `${speed.toFixed(1)}×`; sceneModule?.controlSculpture({ speed });
+});
+$('#dimensionReset').addEventListener('click', () => {
+  sculptureRotation = { x: 0, y: 0 }; $('#speedRange').value = '1'; $('#speedValue').textContent = '1.0×'; sceneModule?.resetSculpture();
+});
+$('#sculpturePulse').addEventListener('click', () => { if (sculpturePlaying) sceneModule?.controlSculpture({ pulse: 1 }); });
+function moveSculpture(dx,dy) {
+  sculptureRotation.x = Math.max(-.9,Math.min(.9,sculptureRotation.x + dy));
+  const is3D = $('#dimensionCanvas').dataset.state === 'webgl';
+  sculptureRotation.y = is3D ? sculptureRotation.y + dx : Math.max(-1.4,Math.min(1.4,sculptureRotation.y + dx));
+  sceneModule?.controlSculpture({ rotationX: sculptureRotation.x, rotationY: sculptureRotation.y });
+}
+sculptureStage.addEventListener('pointerdown', e => { sculptureDrag = { x: e.clientX, y: e.clientY }; sculptureStage.setPointerCapture(e.pointerId); });
+sculptureStage.addEventListener('pointermove', e => {
+  if (!sculptureDrag) return;
+  moveSculpture((e.clientX-sculptureDrag.x)*.006,(e.clientY-sculptureDrag.y)*.004);
+  sculptureDrag = { x: e.clientX, y: e.clientY };
+});
+sculptureStage.addEventListener('pointerup', () => { sculptureDrag = null; });
+sculptureStage.addEventListener('pointercancel', () => { sculptureDrag = null; });
+sculptureStage.addEventListener('keydown', e => {
+  const direction = { ArrowLeft: [-.12,0], ArrowRight: [.12,0], ArrowUp: [0,-.08], ArrowDown: [0,.08] }[e.key];
+  if (direction) { e.preventDefault(); moveSculpture(...direction); }
+});
+reduced.addEventListener('change', () => { sculpturePlaying = !reduced.matches; syncSculptureControl(); });
 setStage(0); updateMotion();
 document.documentElement.dataset.ready = 'true';

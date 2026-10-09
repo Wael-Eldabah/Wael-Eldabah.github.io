@@ -457,3 +457,54 @@ body { isolation:isolate }
 .research-orbit[data-stage="2"] { filter:hue-rotate(-15deg) }
 .research-orbit[data-stage="3"] { filter:hue-rotate(25deg) }
 .research-orbit { transition:filter .7s }
+
+/* V7 — one sculptural identity, including the immersive view and monogram. */
+.brand .brand-mark { width:39px; height:43px; flex:0 0 auto; object-fit:contain; filter:drop-shadow(0 0 8px #92ffe117); transition:filter .4s,transform .4s; }
+.brand:hover .brand-mark { filter:drop-shadow(0 0 10px #92ffe14c); transform:translateY(-1px); }
+.footer-brand img { display:block; width:38px; height:40px; }
+.contact-monogram { position:absolute; width:145px; height:160px; left:calc(50% - 72px); top:calc(50% - 80px); opacity:.7; filter:drop-shadow(0 0 25px #87ffe123); }
+.dimension-launch button { padding:7px 13px 7px 8px; min-height:49px; border-color:#b5efd454; background:linear-gradient(140deg,#101e23ed,#071019f0); }
+.dimension-launch img { width:35px; height:35px; object-fit:contain; filter:drop-shadow(0 0 5px #9c6ded45); transition:transform .5s var(--ease); }
+.dimension-launch button:hover img { transform:rotate(-12deg) translateY(-2px); }
+.sculpture-modal { width:min(1180px,calc(100% - 40px)); max-height:calc(100dvh - 36px); background:#03070d; border-color:#beede457; box-shadow:0 30px 120px #000c; }
+.sculpture-modal .dimension-inner { position:relative; isolation:isolate; overflow:hidden; min-height:460px; height:min(820px,calc(100dvh - 40px)); padding:25px 32px 22px; display:grid; grid-template-rows:auto minmax(0,1fr) auto; background:linear-gradient(180deg,#03070cbd,#03070c38 45%,#03070cbd),url('assets/cinematic-environment.webp') center/cover; }
+.sculpture-modal .dimension-heading { position:relative; z-index:4; }
+.sculpture-modal .dimension-heading p { color:#c9d2dd; font:8px/1.6 var(--mono); letter-spacing:.13em; }
+.sculpture-modal .dimension-heading h2 { font-size:47px; text-transform:none; margin:10px 0 0; }
+.sculpture-modal .dimension-heading h2 em { color:#c8b0ff; }
+.sculpture-modal .dimension-heading button { border-color:#b7d2da50; background:#061018bb; font:17px var(--sans); border-radius:2px; }
+.sculpture-stage { position:relative; min-height:230px; width:100%; isolation:isolate; touch-action:none; cursor:grab; }
+.sculpture-stage:active { cursor:grabbing; }
+.sculpture-stage>.scene-fallback { padding:7px 5%; filter:drop-shadow(0 15px 24px #06031266); will-change:transform; pointer-events:none; }
+.sculpture-stage canvas { position:absolute; inset:0; width:100%; height:100%; min-height:0; z-index:2; display:block; }
+.sculpture-stage .fallback-orbit-back { z-index:0; }
+.sculpture-stage>.scene-fallback { z-index:1; }
+.sculpture-halo { position:absolute; z-index:-1; width:64%; height:24%; bottom:0; left:18%; border-radius:50%; background:radial-gradient(ellipse,#9c6ded52,#77d6d920 40%,transparent 72%); filter:blur(19px); transform:rotateX(58deg); }
+.material-tag { position:absolute; z-index:3; color:#b5c7d7; font:7px var(--mono); letter-spacing:.16em; pointer-events:none; text-shadow:0 2px 9px #000; }
+.material-tag:after { content:''; display:block; margin-top:9px; width:65px; height:1px; background:linear-gradient(90deg,#d6eee563,transparent); }
+.material-stone { left:6%; top:28%; }.material-light { right:3%; top:45%; color:#ceb5f4; }.material-glass { left:12%; bottom:19%; color:#99e9d7; }
+.sculpture-modal .dimension-controls { position:relative; z-index:4; padding:15px 16px; display:grid; grid-template-columns:1fr auto auto auto; gap:12px; background:#061019b8; border:1px solid #a7dacc36; backdrop-filter:blur(12px); border-radius:3px; }
+.sculpture-modal .dimension-controls>span { grid-column:1/-1; color:#c2d5d0; font-size:8px; letter-spacing:.12em; }
+.sculpture-modal .dimension-controls label { font-size:8px; }
+.sculpture-modal .dimension-controls button { min-height:38px; font-size:8px; background:#071119a6; transition:background .2s,border-color .2s; }
+.sculpture-modal .dimension-controls button:hover { background:#172633; border-color:#bfb0f8; }
+#sculpturePulse { color:#d5c3ff; border-color:#b084f959; }
+#sculpturePulse:disabled { opacity:.45; cursor:default; }
+.sculpture-stage:focus-within { outline:1px solid #8ce5ce42; outline-offset:-3px; }
+@media(max-width:680px) {
+ .brand .brand-mark { width:34px; height:37px; }.brand { gap:12px; }
+ .dimension-launch button { min-height:43px; padding:4px 8px 4px 5px; gap:7px; }.dimension-launch img { width:31px; height:31px; }
+ .sculpture-modal { width:calc(100% - 18px); max-height:calc(100dvh - 18px); }
+ .sculpture-modal .dimension-inner { min-height:420px; height:calc(100dvh - 22px); padding:17px 15px 15px; }
+ .sculpture-modal .dimension-heading p { font-size:5px; max-width:210px; }.sculpture-modal .dimension-heading h2 { font-size:34px; }
+ .sculpture-modal .dimension-heading button { min-width:37px; min-height:37px; }
+ .sculpture-stage { min-height:190px; margin-top:9px; }.sculpture-stage>.scene-fallback { padding:0; }
+ .material-tag { display:none; }
+ .sculpture-modal .dimension-controls { padding:11px; grid-template-columns:1fr 1fr; gap:8px; }
+ .sculpture-modal .dimension-controls>span { font-size:6px; letter-spacing:.04em; line-height:1.6; }
+ .sculpture-modal .dimension-controls label { grid-column:1/-1; display:flex; flex-wrap:nowrap; justify-content:space-between; font-size:7px; margin:3px 0; }
+ .sculpture-modal .dimension-controls input { width:115px; }
+ #sculpturePulse { grid-column:1/-1; }
+ .sculpture-modal .dimension-controls button { font-size:7px; min-height:36px; }
+}
+@media(prefers-reduced-motion:reduce) { .brand .brand-mark,.dimension-launch img { transition:none; }.dimension-launch button:hover img,.brand:hover .brand-mark { transform:none; } }
