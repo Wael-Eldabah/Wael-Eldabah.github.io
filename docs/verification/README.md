@@ -1,26 +1,34 @@
-# Browser verification — Living Obsidian 6.1
+# Browser verification — Living Obsidian 7.0
 
-Checked 2026-10-09 in the available cloud Chrome browser.
+Checked 2026-10-09 in cloud Chrome. V7 replaces the wireframe dimension study with an immersive version of the solid obsidian sculpture, independent textured fragments, a breathing light pass, perspective controls and a filled W monogram.
 
-GitHub Pages deployment for `c1d739e0f249565c943f1ac4f001552b360057ee` completed successfully. The root URL was reopened and showed build `living-obsidian-v6.1`, loaded images and no horizontal overflow. The credential reveal correction was also checked on the live site.
+## Live deployment
 
-![Deployed desktop, animated layered-art renderer](desktop-v6.1.jpg)
+GitHub Pages deployment of `bba816728dcd8e92a72cd5c7ff5e9f77ea763204` completed successfully. The root URL was refreshed and reported build `living-obsidian-v7.0`, no missing images and matching viewport/content width at 1348 pixels. The new scene launcher opened the solid sculpture dialog on the published site, with no site-origin warning/error logs.
 
-## Observed
+![Published desktop in animated layered-art mode](desktop-v7.jpg)
 
-- Desktop sections were inspected: introduction, EyeGuard, credentials, approach, research, experience, CV and contact.
-- Responsive checks at 360, 390, 768 and 1348 CSS pixels: no horizontal page overflow; no failed images after loading.
-- Mobile navigation opened, followed the requested anchor and closed.
-- EyeGuard stage selection updated both tab groups, metrics and explanatory copy.
-- eJPT and Huawei detail dialogs opened; closing restored focus and the prior motion state.
-- The industry PDF opened and rendered in Chrome. All three CV links and thumbnails resolve to retained local files.
-- 4D projection rendered on mobile; its pause control changed state; closing restored focus to the launcher.
-- Global motion control synchronizes with the hero control. Layered artwork transforms change when playing and stop when paused.
-- No site-origin JavaScript errors observed. Chrome extension metadata errors are outside the site.
-- Production build, JavaScript syntax, unique IDs, local asset/anchor audit and git whitespace checks passed.
+![Published immersive sculpture in animated layered-art mode](sculpture-v7.jpg)
 
-## Follow-up required on hardware
+## Observed in the V7 preview
 
-WebGL is unavailable in this cloud browser. Screenshots and interaction checks show the animated layered-art compatibility renderer, not the PBR WebGL renderer. Actual GPU output, sustained frame rate, physical iOS/Android behavior and reduced-motion OS settings are not benchmarked here. The rendering caps in the source are targets, not measured guarantees. No Lighthouse score is claimed.
+- Visually inspected introduction, EyeGuard, credentials, approach, research, experience, CV and contact on desktop.
+- At 360, 390, 768, 1280 and 1348 CSS pixels: content width matched viewport width, with no failed images after loading.
+- The immersive sculpture remained visible at 360 and 390 pixels; all controls stayed inside the dialog.
+- Dragging and arrow keys changed the compatibility artwork's perspective. Drift speed changed from 1.0× to 1.1×. Reset restored the default orientation and speed.
+- Pause stopped the artwork transform between observations; Play resumed. The energy pulse control was available while playing and disabled while paused.
+- Close and Escape returned focus to the scene launcher. Closing restored both a previously playing site and a previously paused site.
+- Mobile navigation opened, followed the certifications anchor, and closed.
+- Official INE eJPT and Huawei graphics loaded. Desktop eJPT and mobile Huawei detail dialogs opened and closed.
+- Selecting Detect synchronized both EyeGuard tab groups, metrics and research copy.
+- CV previews showed actual PDF first pages. The original three PDF paths remain unchanged from V6.1.
+- No site-origin warning/error logs observed; extension metadata errors were excluded.
+- Production build, JavaScript syntax, unique IDs, local assets/anchors and git whitespace checks passed.
 
-The responsive harness in viewport.html uses a sized iframe; it checks responsive layout, not real-device touch or GPU behavior.
+## Rendering limits
+
+WebGL is disabled in this cloud browser. Browser screenshots and interactions show the animated Canvas2D layered-art compatibility renderer. The sculpture artwork is textured raster art in this mode; it changes perspective, while orbital lights, dust and solid textured fragments animate independently. It is not the actual PBR WebGL mesh.
+
+The WebGL renderer uses real stone geometry and transmissive glass, but its GPU output and sustained device performance have not been visually verified here. Responsive checks use a sized iframe, not physical iOS/Android devices. No pixel-identical reference match, 60 fps guarantee or Lighthouse score is claimed.
+
+[Previous V6.1 verification](v6.1.md)
