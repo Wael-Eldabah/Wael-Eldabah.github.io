@@ -147,3 +147,30 @@ addEventListener('visibilitychange', () => { stopAmbient(); if (!document.hidden
 addEventListener('resize', resizeAtmosphere, { passive: true });
 reduced.addEventListener('change', syncMotion);
 resizeAtmosphere(); syncMotion(); updateChapters();
+
+// One readable professional dossier; keyboard navigation follows the ARIA tabs pattern.
+const dossierRecords = [
+ {key:'industry',name:'Industry',title:'Offensive<br><em>Security.</em>',description:'A focused view of penetration testing, application security and security engineering experience.',tags:['ASSESSMENT','ENGINEERING','REMEDIATION']},
+ {key:'research',name:'Research',title:'Security<br><em>Research.</em>',description:'Applied security research, AI-assisted network detection and the technical foundations behind EyeGuard.',tags:['APPLIED RESEARCH','NETWORK DETECTION','AI / ML']},
+ {key:'academic',name:'Academic',title:'Academia<br><em>& Teaching.</em>',description:'Teaching, mentoring and a software engineering foundation for academic and instructional opportunities.',tags:['TEACHING','MENTORING','SOFTWARE ENGINEERING']}
+];
+const dossierTabs = $$('[data-cv]');
+function selectDossier(index){
+ const record=dossierRecords[index],file=`cv/Wael_El-Dabah_${record.name}_CV.pdf`;
+ $('.dossier-browser').dataset.perspective=record.key;
+ dossierTabs.forEach((tab,i)=>{tab.setAttribute('aria-selected',String(index===i));tab.tabIndex=index===i?0:-1;});
+ $('#dossierPanel').setAttribute('aria-labelledby',`cvTab${index}`);
+ $('#dossierKicker').textContent=`0${index+1} / ${record.name.toUpperCase()} PERSPECTIVE`;
+ $('#dossierTitle').innerHTML=record.title;$('#dossierDescription').textContent=record.description;
+ $('#dossierEdition').textContent=`${record.name.toUpperCase()} / PDF`;
+ $('#dossierImage').src=`assets/cv-${record.key}-preview.webp`;$('#dossierImage').alt=`First page of Wael's ${record.key} CV`;
+ $('#dossierPreview').setAttribute('aria-label',`Preview ${record.key} CV`);
+ ['#dossierPreview','#dossierView','#dossierDownload'].forEach(id=>$(id).href=file);
+ $('#dossierTags').replaceChildren(...record.tags.map(text=>{const tag=document.createElement('span');tag.textContent=text;return tag;}));
+ $('#dossierPanel').classList.remove('dossier-changing');
+ if(motion&&!reduced.matches)requestAnimationFrame(()=>$('#dossierPanel').classList.add('dossier-changing'));
+}
+dossierTabs.forEach((tab,i)=>{
+ tab.addEventListener('click',()=>selectDossier(i));
+ tab.addEventListener('keydown',e=>{let next;if(e.key==='ArrowRight')next=(i+1)%3;if(e.key==='ArrowLeft')next=(i+2)%3;if(e.key==='Home')next=0;if(e.key==='End')next=2;if(next!==undefined){e.preventDefault();selectDossier(next);dossierTabs[next].focus();}});
+});

@@ -29,7 +29,7 @@ $('#disperseButton').addEventListener('click', e => {
 // Keep the readable HTML and environment available before loading any 3D code.
 let scenesPromise;
 const loadScenes = () => scenesPromise ||= (async () => {
-  try { sceneModule = await import('./dist/cinematic.js?v=8.0'); sceneModule.initScenes(); sceneModule.setMotion(playing); sceneModule.setSpread(dispersed); }
+  try { sceneModule = await import('./dist/cinematic.js?v=8.1'); sceneModule.initScenes(); sceneModule.setMotion(playing); sceneModule.setSpread(dispersed); }
   catch (e) { $('#disperseButton').hidden = true; $('.scene-caption').textContent = 'OBSIDIAN / VIOLET / MINT'; console.warn('Artwork fallback active.', e.message); }
 })();
 if ('requestIdleCallback' in window) requestIdleCallback(loadScenes, { timeout: 600 }); else setTimeout(loadScenes, 60);
@@ -70,7 +70,7 @@ function setStage(i) {
   startRadar();
   document.dispatchEvent(new CustomEvent('portfolio:stage', { detail: { index: i } }));
 }
-$$('[role="tablist"]').forEach((list, group) => {
+$$('.soc-switches,.research-list').forEach((list, group) => {
   const tabs = $$('[role="tab"]', list);
   tabs.forEach((button, i) => {
     button.id = `workflow-${group}-${i}`; button.setAttribute('aria-controls', 'researchDetail');
