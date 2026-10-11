@@ -1,0 +1,207 @@
+/* V8.2: reference-led serif silhouettes, clear signals and a mobile art stage. */
+:root {
+  --ink: #f1f6f4;
+  --muted: #c5d2da;
+  --mint: #a4f7df;
+  --violet: #cfb6ff;
+  --signal-rgb: 164, 247, 223;
+}
+h1, h2, h3 { font-optical-sizing: auto; }
+.hero h1 { font-weight: 400; letter-spacing: -.045em; line-height: .96; }
+.hero h1 > span { color: #f0faf6; }
+.role { font-weight: 400; letter-spacing: -.035em; color: #d7f3ea; }
+.project-intro h2 { font-weight: 400; letter-spacing: -.045em; line-height: 1.05; }
+.project-intro h2 span { font-weight: 400; color: var(--mint); }
+.project-intro h3 { font-weight: 400; font-size: clamp(26px, 2.2vw, 35px); letter-spacing: -.025em; line-height: 1.24; }
+.story-header h2, .research-header h2, .section-heading h2,
+.credentials-heading h2, .cv-header h2, .contact h2 { font-weight: 400; }
+.cv-header h2 { font-size: clamp(44px, 4.8vw, 76px); letter-spacing: -.04em; }
+.cv-header h2 em, .dossier-copy h3 em { font-weight: 400; }
+.dossier-copy h3 { font-weight: 400; font-size: clamp(45px, 4.8vw, 72px); letter-spacing: -.04em; line-height: 1.07; }
+.section-label { color: #c6d5df; }
+.section-label b { color: var(--violet); font-weight: 400; }
+.project-category { color: #cfb6ff !important; }
+.story-card, .credential-card, .experience-row { position: relative; }
+.story-card:nth-child(1) { --card-accent: #a4f7df; }
+.story-card:nth-child(2) { --card-accent: #cfb6ff; }
+.story-card:nth-child(3) { --card-accent: #a4deff; }
+.story-card { border-top: 1px solid var(--card-accent); }
+.story-card > span, .story-card small { color: var(--card-accent); }
+.story-card h3 { font-weight: 400; color: #f0f7f4; }
+.credential-card { border-radius: 5px; }
+.credential-card:focus-within { border-color: #a4f7df; }
+.credential-issuer { line-height: 1.7; }
+.credential-bottom { min-height: 44px; font-size: 10px; letter-spacing: .02em; }
+.credential-caption { line-height: 1.8; }
+.button, .dossier-tabs button, .stage, .soc-switch { -webkit-tap-highlight-color: transparent; }
+.button:active { transform: translateY(0); }
+.button:focus-visible { outline-offset: 5px; box-shadow: 0 0 0 7px #061019; }
+.button > span, .credential-bottom b { transition: translate .25s var(--ease); }
+.button:hover > span, .credential-bottom:hover b { translate: 2px -1px; }
+.stroke-button { border-color: #b0c5ce80; }
+.scene-controls button, .chapter-hud button { min-height: 44px; }
+.scene-controls { gap: 8px; }
+.scene-caption { font-size: 8px; }
+.soc-stage { transition: border-color .35s; border-color: rgba(var(--signal-rgb), .48); }
+.soc-switch, .stage { transition: color .25s, background-color .25s, border-color .25s; }
+.soc-switch.active, .stage.active {
+  color: rgb(var(--signal-rgb));
+  border-color: rgba(var(--signal-rgb), .7);
+  background: linear-gradient(100deg, rgba(var(--signal-rgb), .14), rgba(var(--signal-rgb), .02));
+}
+#socModeText, #researchKicker, .research-detail > div span { color: rgb(var(--signal-rgb)); }
+.research-detail > div span { border-color: rgba(var(--signal-rgb), .32); }
+.research-body { transition: border-color .35s; border-color: rgba(var(--signal-rgb), .35); }
+.soc-metrics small { color: #b9cdd4; font-size: 8px; line-height: 1.6; }
+.soc-metrics strong { color: #e4f5f0; font-size: 12px; }
+.soc-switch { font-size: 9px; min-height: 40px; }
+.stage { min-height: 48px; }
+.research-detail { min-width: 0; }
+.research-detail h3 { font-weight: 400; }
+.research-detail > div { flex-wrap: wrap; }
+.dossier-browser { border-radius: 5px; overflow: hidden; }
+.dossier-tabs button { font-weight: 600; font-size: 11px; letter-spacing: .08em; }
+.dossier-tabs button[aria-selected=true] { background: linear-gradient(100deg, #c5e4e914, transparent); }
+.dossier-copy, .dossier-document { min-width: 0; }
+.dossier-kicker, .document-caption { font-size: 10px; }
+.dossier-tags span { font-size: 10px; line-height: 1.55; padding: 7px 10px; }
+.dossier-download { display: inline-flex; align-items: center; gap: 12px; min-height: 44px; font-size: 11px; }
+.dossier-note { font-size: 9px; letter-spacing: .035em; }
+.document-caption { flex-wrap: wrap; }
+.document-plane { transition: border-color .35s; border-color: var(--dossier-accent); opacity: .45; }
+#dossierPreview { max-width: 100%; }
+#dossierPreview > span { font-size: 9px; }
+.contact-actions a { min-height: 44px; display: inline-flex; align-items: center; }
+footer { padding-bottom: 88px; }
+.dimension-launch { bottom: max(16px, env(safe-area-inset-bottom)); }
+.chapter-hud { bottom: max(16px, env(safe-area-inset-bottom)); }
+body:has(dialog[open]) { overflow: hidden; }
+.is-offscreen *, .is-offscreen::before, .is-offscreen::after,
+.is-offscreen *::before, .is-offscreen *::after,
+.page-hidden *, .page-hidden *::before, .page-hidden *::after { animation-play-state: paused !important; }
+.motion-paused [data-tilt], .motion-paused [data-tilt]:hover { transform: none; }
+
+/* Highlighted words keep a solid readable fallback when clipping is unsupported. */
+@supports (background-clip: text) or (-webkit-background-clip: text) {
+  .project-intro h2 span, .cv-header h2 em, .contact h2 em {
+    background: linear-gradient(115deg, #d1ffed 5%, #a4f7df 52%, #c8c3ff 100%);
+    -webkit-background-clip: text; background-clip: text; color: transparent;
+  }
+}
+@media (hover: hover) and (pointer: fine) {
+  .story-card:hover { border-color: var(--card-accent); }
+  .credential-card:hover .credential-bottom { color: var(--mint); }
+}
+@media (max-width: 1100px) {
+  .dossier-copy h3 { font-size: 53px; }
+  .dossier-kicker { font-size: 9px; }
+  .dossier-tags span { font-size: 9px; }
+}
+@media (max-width: 800px) {
+  /* Copy determines its own height; artwork can never cover a wrapped title. */
+  .hero { display: grid; grid-template-columns: minmax(0, 1fr); height: auto; min-height: 0; padding-bottom: 20px; }
+  .hero-copy { grid-column: 1 / -1; width: 100%; height: auto; padding: 40px 5.5% 8px; }
+  .hero h1 { font-size: clamp(66px, 15vw, 94px); }
+  .hero-art { grid-column: 1 / -1; grid-row: 2; position: relative; inset: auto; width: 100%; height: clamp(360px, 87vw, 580px); margin: 0; }
+  .portrait-panel { grid-column: 1; grid-row: 4; position: relative; inset: auto; width: 89%; height: 250px; margin: 28px auto 0; background: linear-gradient(115deg, #101c24, #081019 60%, #19152d); }
+  .portrait-image { width: 49%; object-position: 50% 25%; }
+  .portrait-signature { right: 10%; bottom: 43%; font-size: 38px; }
+  .portrait-quote { display: block; right: 9%; bottom: 11%; font-size: 9px; line-height: 1.8; }
+  .portrait-vignette { background: linear-gradient(90deg, transparent 25%, #081019 56%); }
+  .hero .scene-controls { grid-column: 1 / -1; grid-row: 3; position: relative; inset: auto; justify-self: start; margin: 0 5.5%; flex-wrap: wrap; }
+  .hero-base-caption { grid-column: 1 / -1; grid-row: 5; position: relative; inset: auto; margin: 17px 5.5% 0; line-height: 1.8; }
+  .hero-art .scene-fallback { padding: 0; }
+  .cv-header h2 { font-size: 48px; }
+  .dossier-copy h3 { font-size: 45px; }
+  .dossier-panel { grid-template-columns: minmax(0, 42%) minmax(0, 58%); }
+  .dossier-copy { padding-inline: 24px; }
+  .document-caption { font-size: 8px; }
+  .soc-stage { transform: none; }
+}
+@media (max-width: 520px) {
+  .hero-copy { padding-top: 32px; }
+  .hero h1 { font-size: clamp(64px, 18vw, 88px); }
+  .role { font-size: clamp(22px, 5.8vw, 28px); max-width: 100%; }
+  .short-desc { font-size: 14px; line-height: 1.8; max-width: 100%; }
+  .hero .actions { gap: 10px; }
+  .hero-copy .button { padding-inline: 13px; font-size: 10px; letter-spacing: .025em; gap: 13px; }
+  .hero-disciplines { flex-wrap: wrap; gap: 14px; }
+  .hero-art { height: clamp(330px, 98vw, 500px); width: 100%; margin: 0; }
+  .portrait-panel { width: 89%; height: 220px; }
+  .portrait-signature { font-size: 33px; }
+  .scene-caption { width: 100%; margin-bottom: 3px; font-size: 9px; }
+  .scene-controls button { font-size: 10px; }
+  .hero-base-caption { font-size: 7px; }
+  .project-intro h2 { font-size: clamp(54px, 15.5vw, 68px); }
+  .project-intro h3 { font-size: 28px; }
+  .project-intro > p:not(.section-label):not(.project-category),
+  .story-header > p:not(.section-label), .story-card p, .research-header > p,
+  .research-detail p, .experience-row p, .dossier-copy > p, .contact > p:not(.section-label) { font-size: 14px; line-height: 1.85; }
+  .project-intro .button { min-height: 44px; font-size: 10px; }
+  .orb-zone { height: clamp(330px, 95vw, 430px); min-height: 330px; }
+  .credentials-heading .section-label { font-size: 9px; }
+  .credential-card { min-height: 284px; }
+  .credential-card .credential-issuer { font-size: 8px; line-height: 1.8; }
+  .credential-card h3 { font-size: 15px; overflow-wrap: anywhere; }
+  .credential-card p { font-size: 12px; }
+  .credential-bottom { font-size: 8px; padding-top: 9px; line-height: 1.6; text-align: left; gap: 5px; }
+  .credential-caption { font-size: 9px; }
+  .soc-switch { min-height: 44px; font-size: 9px; }
+  .soc-metrics small { font-size: 8px; }
+  .soc-metrics strong { font-size: 11px; }
+  .cv-header h2 { font-size: clamp(42px, 11.6vw, 52px); }
+  .dossier-tabs button { font-size: 10px; letter-spacing: .025em; padding: 17px 9px; gap: 6px; min-height: 60px; }
+  .dossier-tabs button > span { font-size: 9px; }
+  .dossier-copy { padding: 28px 22px 30px; }
+  .dossier-copy h3 { font-size: clamp(42px, 12.5vw, 53px); }
+  .dossier-kicker, .dossier-tags span, .document-caption { font-size: 9px; }
+  .dossier-note { font-size: 8px; }
+  .dossier-actions { gap: 16px; }
+  .dossier-actions .button, .dossier-download { font-size: 10px; min-height: 44px; }
+  .dimension-launch { right: 10px; }
+  .chapter-hud { left: 10px; }
+  .chapter-hud button { width: 42px; }
+  .dimension-launch small { font-size: 7px; }
+}
+@media (max-width: 360px) {
+  .dossier-tabs button { font-size: 9px; letter-spacing: 0; }
+  .hero-copy .button { font-size: 9px; }
+  #chapterName { max-width: 68px; }
+  .dimension-launch button { padding-inline: 9px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  .button, #dossierPreview, .document-plane { transition: none; }
+}
+
+/* A consistent serif weight prevents faux bold on the single-weight display face. */
+h1, h2, h3, .role, .footer-brand, .dimension-launch span { font-synthesis: none; }
+.hero h1, .project-intro h2, .project-intro h2 span, .project-intro h3,
+.story-card h3, .experience-row h3, .research-detail h3, .dossier-copy h3,
+.dossier-copy h3 em, .cv-header h2 em { font-weight: 400; }
+.hero h1 { max-width: 100%; }
+.scene-fallback { opacity: 1; }
+.hero-art, .orb-zone, .chapter-art { opacity: 1; }
+.hero-art canvas { touch-action: pan-y; }
+@media (max-width: 800px) {
+  .hero-art { background: radial-gradient(ellipse at center, #6440aa18, transparent 68%); }
+  .hero .scene-controls { justify-self: center; justify-content: center; }
+  .hero .scene-caption { display: inline-flex; justify-content: center; }
+  .hero h1 { font-size: clamp(64px, 15vw, 98px); }
+  .chapter-coordinate { font-size: 9px; }
+}
+@media (max-width: 520px) {
+  .hero h1 { font-size: clamp(60px, 16.5vw, 85px); }
+  .hero-disciplines p { font-size: 9px; }
+  .eyebrow { font-size: 9px; letter-spacing: .08em; }
+  .eyebrow i { flex: 1; min-width: 12px; }
+  .hero .actions { flex-wrap: wrap; }
+  .hero-copy .button { flex: 1; justify-content: space-between; }
+  .hero-base-caption { font-size: 8px; letter-spacing: .025em; text-align: center; }
+  .project-intro .actions { flex-wrap: wrap; }
+  .project-intro .button { flex: 1; justify-content: space-between; }
+  .research-orbit { height: 350px; min-height: 350px; margin-bottom: 0; }
+  .research-orbit:after { bottom: 2px; }
+  .scene-caption { display: inline-flex; }
+  .dossier-tabs button { font-family: var(--sans); }
+}

@@ -29,7 +29,7 @@ $('#disperseButton').addEventListener('click', e => {
 // Keep the readable HTML and environment available before loading any 3D code.
 let scenesPromise;
 const loadScenes = () => scenesPromise ||= (async () => {
-  try { sceneModule = await import('./dist/scene.js?v=7.0'); sceneModule.initScenes(); sceneModule.setMotion(playing); sceneModule.setSpread(dispersed); }
+  try { sceneModule = await import('./dist/cinematic.js?v=8.2'); sceneModule.initScenes(); sceneModule.setMotion(playing); sceneModule.setSpread(dispersed); }
   catch (e) { $('#disperseButton').hidden = true; $('.scene-caption').textContent = 'OBSIDIAN / VIOLET / MINT'; console.warn('Artwork fallback active.', e.message); }
 })();
 if ('requestIdleCallback' in window) requestIdleCallback(loadScenes, { timeout: 600 }); else setTimeout(loadScenes, 60);
@@ -62,18 +62,28 @@ const states = [
 let stageIndex = 0;
 function setStage(i) {
   stageIndex = i; const s = states[i];
+  const colors = ['164,247,223', '207,182,255', '164,222,255', '183,208,255'];
+  ['#work', '#research'].forEach(id => $(id).style.setProperty('--signal-rgb', colors[i]));
   $('#socModeText').textContent = s.mode;
   ['#metricOne', '#metricTwo', '#metricThree'].forEach((id, j) => $(id).textContent = s.metrics[j]);
   $('#researchKicker').textContent = s.kicker; $('#researchTitle').innerHTML = s.title; $('#researchDescription').textContent = s.description;
   $('#researchTags').replaceChildren(...s.tags.map(t => { const el = document.createElement('span'); el.textContent = t; return el; }));
-  $$('.soc-switch,.stage').forEach(button => { const selected = Number(button.dataset.index) === i; button.classList.toggle('active', selected); button.setAttribute('aria-selected', String(selected)); button.tabIndex = selected ? 0 : -1; });
+  $$('.soc-switch,.stage').forEach(button => {
+    const selected = Number(button.dataset.index) === i;
+    button.classList.toggle('active', selected);
+    if (button.classList.contains('stage')) {
+      button.setAttribute('aria-selected', String(selected));
+      button.tabIndex = selected ? 0 : -1;
+    } else button.setAttribute('aria-pressed', String(selected));
+  });
+  $('#researchDetail').setAttribute('aria-labelledby', `workflow-1-${i}`);
   startRadar();
   document.dispatchEvent(new CustomEvent('portfolio:stage', { detail: { index: i } }));
 }
-$$('[role="tablist"]').forEach((list, group) => {
-  const tabs = $$('[role="tab"]', list);
+$$('.soc-switches,.research-list').forEach((list, group) => {
+  const tabs = $$('button[data-index]', list);
   tabs.forEach((button, i) => {
-    button.id = `workflow-${group}-${i}`; button.setAttribute('aria-controls', 'researchDetail');
+    button.id = `workflow-${group}-${i}`; button.setAttribute('aria-controls', group ? 'researchDetail' : 'socPanel');
     button.addEventListener('click', () => setStage(i));
     button.addEventListener('keydown', e => {
       let target;
@@ -95,6 +105,7 @@ const nodes = Array.from({ length: 105 }, (_, i) => { const y = 1 - (i / 104) * 
 function startRadar() { if (!radarFrame && radarVisible && !document.hidden) radarFrame = requestAnimationFrame(drawRadar); }
 function drawRadar(ms) {
   radarFrame = 0; if (!radarVisible || document.hidden || !radarContext) return;
+  if (playing && radarLast && ms - radarLast < 32) { startRadar(); return; }
   const dt = radarLast ? Math.min(ms - radarLast, 100) : 16; radarLast = ms;
   if (playing) radarTime += dt * .00012;
   const d = Math.min(devicePixelRatio || 1, 1.5), w = radarCanvas.clientWidth, h = radarCanvas.clientHeight;

@@ -2,6 +2,7 @@
 const $ = s => document.querySelector(s);
 const $$ = s => [...document.querySelectorAll(s)];
 const reduced = matchMedia('(prefers-reduced-motion: reduce)');
+const finePointer = matchMedia('(hover: hover) and (pointer: fine)');
 let motion = !document.body.classList.contains('motion-paused');
 const motionButton = $('#motionButton');
 const globalMotion = $('#globalMotion');
@@ -11,6 +12,11 @@ const chapters = [
   ['cv', 'THE DOSSIER'], ['contact', 'OPEN CHANNEL']
 ].map(([id, name]) => ({ element: document.getElementById(id), id, name }));
 let activeChapter = -1, scrollFrame = 0, crossingTimer = 0;
+// Pause decorative CSS work in sections outside the viewport, as well as canvases.
+const sectionVisibility = new IntersectionObserver(entries => {
+  for (const entry of entries) entry.target.classList.toggle('is-offscreen', !entry.isIntersecting);
+}, { rootMargin: '80px' });
+chapters.forEach(({ element }) => sectionVisibility.observe(element));
 function updateChapters() {
   scrollFrame = 0;
   let current = 0;
@@ -53,11 +59,13 @@ $$('.story-grid,.credential-grid,.cv-grid').forEach(grid => [...grid.children].f
 $$('[data-tilt]').forEach(card => {
   let pending = 0, last;
   card.addEventListener('pointermove', e => {
-    if (!motion || reduced.matches || e.pointerType !== 'mouse') return;
+    if (!motion || reduced.matches || !finePointer.matches || e.pointerType !== 'mouse') return;
     last = { x: e.clientX, y: e.clientY };
     if (pending) return;
     pending = requestAnimationFrame(() => {
-      pending = 0; const r = card.getBoundingClientRect();
+      pending = 0;
+      if (!motion || reduced.matches) return;
+      const r = card.getBoundingClientRect();
       const x = (last.x - r.left) / r.width, y = (last.y - r.top) / r.height;
       card.style.setProperty('--rx', `${(0.5 - y) * 5}deg`);
       card.style.setProperty('--ry', `${(x - .5) * 6}deg`);
@@ -139,11 +147,39 @@ function syncMotion() {
   motion = !document.body.classList.contains('motion-paused');
   globalMotion.textContent = motion ? 'Ⅱ' : '▷'; globalMotion.setAttribute('aria-pressed', String(!motion));
   globalMotion.setAttribute('aria-label', motion ? 'Pause site animation' : 'Play site animation');
+  if (!motion) $$('[data-tilt]').forEach(card => { card.style.setProperty('--rx', '0deg'); card.style.setProperty('--ry', '0deg'); });
   stopAmbient(); requestAmbient(); requestChapterUpdate();
 }
 globalMotion.addEventListener('click', () => motionButton.click());
 document.addEventListener('portfolio:motion', syncMotion);
-addEventListener('visibilitychange', () => { stopAmbient(); if (!document.hidden) requestAmbient(); });
+addEventListener('visibilitychange', () => { document.body.classList.toggle('page-hidden', document.hidden); stopAmbient(); if (!document.hidden) requestAmbient(); });
 addEventListener('resize', resizeAtmosphere, { passive: true });
 reduced.addEventListener('change', syncMotion);
 resizeAtmosphere(); syncMotion(); updateChapters();
+
+// One readable professional dossier; keyboard navigation follows the ARIA tabs pattern.
+const dossierRecords = [
+ {key:'industry',name:'Industry',title:'Offensive<br><em>Security.</em>',description:'A focused view of penetration testing, application security and security engineering experience.',tags:['ASSESSMENT','ENGINEERING','REMEDIATION']},
+ {key:'research',name:'Research',title:'Security<br><em>Research.</em>',description:'Applied security research, AI-assisted network detection and the technical foundations behind EyeGuard.',tags:['APPLIED RESEARCH','NETWORK DETECTION','AI / ML']},
+ {key:'academic',name:'Academic',title:'Academia<br><em>& Teaching.</em>',description:'Teaching, mentoring and a software engineering foundation for academic and instructional opportunities.',tags:['TEACHING','MENTORING','SOFTWARE ENGINEERING']}
+];
+const dossierTabs = $$('[data-cv]');
+function selectDossier(index){
+ const record=dossierRecords[index],file=`cv/Wael_El-Dabah_${record.name}_CV.pdf`;
+ $('.dossier-browser').dataset.perspective=record.key;
+ dossierTabs.forEach((tab,i)=>{tab.setAttribute('aria-selected',String(index===i));tab.tabIndex=index===i?0:-1;});
+ $('#dossierPanel').setAttribute('aria-labelledby',`cvTab${index}`);
+ $('#dossierKicker').textContent=`0${index+1} / ${record.name.toUpperCase()} PERSPECTIVE`;
+ $('#dossierTitle').innerHTML=record.title;$('#dossierDescription').textContent=record.description;
+ $('#dossierEdition').textContent=`${record.name.toUpperCase()} / PDF`;
+ $('#dossierImage').src=`assets/cv-${record.key}-preview.webp`;$('#dossierImage').alt=`First page of Wael's ${record.key} CV`;
+ $('#dossierPreview').setAttribute('aria-label',`Preview ${record.key} CV`);
+ ['#dossierPreview','#dossierView','#dossierDownload'].forEach(id=>$(id).href=file);
+ $('#dossierTags').replaceChildren(...record.tags.map(text=>{const tag=document.createElement('span');tag.textContent=text;return tag;}));
+ $('#dossierPanel').classList.remove('dossier-changing');
+ if(motion&&!reduced.matches)requestAnimationFrame(()=>$('#dossierPanel').classList.add('dossier-changing'));
+}
+dossierTabs.forEach((tab,i)=>{
+ tab.addEventListener('click',()=>selectDossier(i));
+ tab.addEventListener('keydown',e=>{let next;if(e.key==='ArrowRight')next=(i+1)%3;if(e.key==='ArrowLeft')next=(i+2)%3;if(e.key==='Home')next=0;if(e.key==='End')next=2;if(next!==undefined){e.preventDefault();selectDossier(next);dossierTabs[next].focus();}});
+});
