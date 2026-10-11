@@ -1,3 +1,5 @@
+import { drawSignalGlobe } from './globe.js';
+import { DEFAULT_MOTION_SPEED } from './motion.js';
 // V8: transparent cinematic video inside a shared layered scene. Detailed still
 // artwork is retained while media loads and on browsers without video alpha.
 // Surrounding fragments, particles and light remain independently interactive.
@@ -7,8 +9,9 @@ const clamp = (n,a,b) => Math.min(b,Math.max(a,n));
 const asset = name => new URL(`../assets/${name}`,import.meta.url).href;
 const art = {};
 const views = [];
+let signalStage = 0;
 let playing = !reduced.matches, modalOpen = false, expanded = false, focusView;
-const focus = {open:false,playing:!reduced.matches,speed:1,rotationX:0,rotationY:0,pulse:0};
+const focus = {open:false,playing:!reduced.matches,speed:DEFAULT_MOTION_SPEED,rotationX:0,rotationY:0,pulse:0};
 const media = {};
 for(const [type,name] of [['hero','obsidian'],['orb','prism']]){
   const video=document.createElement('video');
@@ -46,12 +49,12 @@ function syncMedia(){
       const size=matchMedia('(max-width:800px)').matches?'mobile-':'';
       loadVideo(entry,size?'mobile':'desktop');
     }
-    entry.video.playbackRate=focus.open?focus.speed:1;
+    entry.video.playbackRate=focus.open?focus.speed:DEFAULT_MOTION_SPEED;
     if(active&&entry.requested&&!entry.failed){if(entry.video.paused)entry.video.play().catch(()=>{});}
     else entry.video.pause();
   }
 }
-const artworkFiles={hero:'obsidian-v8.webp',orb:'prism-v8.webp',portal:'rift-v8.webp',spire:'spire-v8.webp',rock:'obsidian-shard.webp'};
+const artworkFiles={hero:'obsidian-v8.webp',orb:'prism-v8.webp',globe:'eyeguard-crystal.webp',portal:'rift-v8.webp',spire:'spire-v8.webp',rock:'obsidian-shard.webp'};
 function loadArtwork(key){if(!art[key].src)art[key].src=asset(artworkFiles[key]);}
 for (const key of Object.keys(artworkFiles)) {
   const img=new Image(); img.decoding='async'; art[key]=img;
@@ -64,7 +67,7 @@ class CinematicScene {
     this.frame=0;this.time=0;this.last=0;this.visible=false;this.mx=0;this.my=0;this.px=0;this.py=0;this.energy=0;
     this.fallback=canvas.parentElement.querySelector('.scene-fallback');
     canvas.dataset.state='cinematic-layers';
-    canvas.setAttribute('aria-label',`Animated ${({hero:'obsidian sculpture',orb:'angular crystal core',portal:'basalt rift',spire:'layered spire'})[type]} with textured layers, depth, fragments and light`);
+    canvas.setAttribute('aria-label',`Animated ${({hero:'obsidian sculpture',globe:'geographic signal globe',orb:'angular crystal core',portal:'basalt rift',spire:'layered spire'})[type]} with textured layers, depth, fragments and light`);
     this.resizeObserver=new ResizeObserver(()=>{this.resize();this.request();});this.resizeObserver.observe(canvas);
     this.observer=new IntersectionObserver(([e])=>{this.visible=e.isIntersecting;if(this.visible){loadArtwork(this.type);loadArtwork('rock');this.request();}else this.stop();syncMedia();},{rootMargin:'90px'});this.observer.observe(canvas);
     const parent=canvas.parentElement;
@@ -81,9 +84,18 @@ class CinematicScene {
     this.frame=0;if(document.hidden||!this.visible||!this.w||!this.h)return;
     const move=this.isFocus?focus.playing:playing;
     if(move&&this.last&&ms-this.last<31){this.request();return;}
-    const dt=(this.last?Math.min((ms-this.last)/1000,.12):.016)*(this.isFocus?focus.speed:1);this.last=ms;if(move)this.time+=dt;
+    const dt=(this.last?Math.min((ms-this.last)/1000,.12):.016)*(this.isFocus?focus.speed:DEFAULT_MOTION_SPEED);this.last=ms;if(move)this.time+=dt;
     const t=this.time,c=this.ctx,w=this.w,h=this.h,cfg=config[this.type],img=art[this.type];
-    if(!c||!img.complete||!img.naturalWidth)return;
+    if(!c)return;
+    if(this.type==='globe'){
+      c.setTransform(this.dpr,0,0,this.dpr,0,0);c.clearRect(0,0,w,h);
+      this.px+=(this.mx-this.px)*.075;this.py+=(this.my-this.py)*.075;
+      drawSignalGlobe(c,w,h,t,signalStage,this.px,this.py);
+      if(this.fallback)this.fallback.style.visibility='hidden';
+      this.canvas.dataset.media='geographic-globe';this.canvas.dataset.frame=String(Math.round(t*30));
+      if(move)this.request();return;
+    }
+    if(!img.complete||!img.naturalWidth)return;
     const clip=media[this.type],motionSource=clip?.ready?clip.video:img;
     this.canvas.dataset.media=clip?.ready?'video':'artwork';
     if(clip?.ready)this.canvas.dataset.videoTime=clip.video.currentTime.toFixed(2);
@@ -140,9 +152,10 @@ export function setSpread(value){expanded=value;for(const view of views)view.req
 export function openSculpture(canvas){focus.open=true;focus.playing=!reduced.matches;if(!focusView)focusView=new CinematicScene(canvas,'hero',true);focusView.resize();focusView.visible=true;focusView.request();syncMedia();return{renderer:'cinematic-layers',playing:focus.playing};}
 export function closeSculpture(){focus.open=false;focusView?.stop();syncMedia();}
 export function controlSculpture(values){Object.assign(focus,values);focusView?.stop();focusView?.request();syncMedia();}
-export function resetSculpture(){Object.assign(focus,{rotationX:0,rotationY:0,speed:1,pulse:0});focusView?.request();syncMedia();}
+export function resetSculpture(){Object.assign(focus,{rotationX:0,rotationY:0,speed:DEFAULT_MOTION_SPEED,pulse:0});focusView?.request();syncMedia();}
 export function initScenes(){
-  for(const [id,type]of [['heroCanvas','hero'],['orbCanvas','orb'],['aboutCanvas','portal'],['researchCanvas','orb'],['experienceCanvas','spire']]){const canvas=document.getElementById(id);if(canvas)new CinematicScene(canvas,type);}
+  document.addEventListener('portfolio:stage',e=>{signalStage=e.detail.index;for(const view of views)if(view.type==='globe')view.request();});
+  for(const [id,type]of [['heroCanvas','hero'],['orbCanvas','globe'],['aboutCanvas','portal'],['researchCanvas','orb'],['experienceCanvas','spire']]){const canvas=document.getElementById(id);if(canvas)new CinematicScene(canvas,type);}
   document.querySelector('#disperseButton').hidden=false;document.querySelector('.scene-caption').textContent='OBSIDIAN / INTERACTIVE';
   document.addEventListener('portfolio:modal',e=>{modalOpen=e.detail.open;for(const view of views){view.stop();if(!modalOpen)view.request();}syncMedia();});
   document.addEventListener('visibilitychange',()=>{for(const view of views){view.stop();if(!document.hidden)view.request();}focusView?.stop();if(!document.hidden)focusView?.request();syncMedia();});

@@ -1,0 +1,123 @@
+/* V8.3 — silver typography, an issuer-led credential gallery, and a geographic signal globe. */
+:root { --silver: #bec8d4; --mint-bright: #b5ffe7; --lilac: #d2baff; }
+.hero h1 { color: #f1f5f7; letter-spacing: -.043em; line-height: .96; text-shadow: none; }
+.hero h1 > span { display: block; color: inherit; }
+.hero .role { color: #e0e5e9; letter-spacing: -.023em; }
+.hero .short-desc { color: #c5ced7; }
+.hero .eyebrow { color: #c6d2de; }
+.project-intro h2 { color: #f3f6f8; letter-spacing: -.04em; }
+.story-header h2, .research-header h2, .section-heading h2, .cv-header h2, .contact h2 { color: #f2f5f8; }
+.story-header h2 em, .section-heading h2 em { color: var(--lilac); font-style: normal; }
+.research-header h2 em { color: var(--mint-bright); font-style: normal; }
+.story-header > p, .research-header > p, .cv-header > p:last-child { color: #c4cdd8; }
+.section-label { color: #b9c9d6; }
+.section-label b { color: #c7a3ff; }
+.experience-row strong { color: #ceafff; }
+.story-card small { color: var(--card-accent); }
+@supports (background-clip: text) or (-webkit-background-clip: text) {
+  .hero h1 > span {
+    background: linear-gradient(172deg, #ffffff 5%, #eef2f5 31%, #c8d0d9 52%, #f4f7fa 64%, #a9b4c3 100%);
+    background-clip: text; -webkit-background-clip: text; color: transparent;
+  }
+  .project-intro h2 span { background-image: linear-gradient(115deg, #e1fff3, #a0ffe0 53%, #c5b4ff); }
+  .cv-header h2 em, .contact h2 em { background-image: linear-gradient(115deg, #ddd1ff 5%, #c7b2ff 44%, #b4ffe7); }
+}
+.orb-zone { min-height: 460px; }
+.orb-zone .scene-fallback { padding: 9% 12%; }
+.orb-zone .feature-capabilities { display: none; }
+.globe-caption { position: absolute; inset: auto 0 18px; display: flex; justify-content: center; align-items: center; flex-wrap: wrap; gap: 10px; z-index: 3; font: 9px/1.7 var(--mono); letter-spacing: .08em; color: #c6f8e8; pointer-events: none; }
+.globe-caption small { width: 100%; text-align: center; color: #9eaebe; font: 8px/1.5 var(--mono); letter-spacing: .09em; }
+.credentials-strip { display: block; padding: 66px 5.5% 70px; background: radial-gradient(ellipse at 10% 20%, #17372e45, transparent 55%), radial-gradient(ellipse at 95% 85%, #361a543a, transparent 55%), #060c14; }
+.credentials-heading { display: grid; grid-template-columns: 1fr auto; align-items: end; gap: 0 32px; margin: 0 0 34px; }
+.credentials-heading .section-label { grid-column: 1 / -1; font-size: 10px; }
+.credentials-heading h2 { grid-column: 1; grid-row: 2 / 4; font: 400 clamp(38px, 4vw, 62px)/1.06 var(--serif); letter-spacing: -.025em; margin: 18px 0 0; }
+.credentials-heading h2 em { color: #c3adf6; font-style: normal; }
+.credentials-heading > p { font: 14px/1.8 var(--sans); max-width: 255px; margin: 0 0 10px; color: #c4d0dc; }
+.credential-caption { font: 9px/1.7 var(--mono); color: #a8c7be; letter-spacing: .04em; margin: 0; }
+.credential-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 18px; }
+.credential-card { --credential-accent: #ff92be; --credential-rgb: 240, 84, 149; position: relative; display: grid; grid-template-columns: minmax(150px, 40%) minmax(0, 1fr); grid-template-rows: 1fr auto; gap: 0 25px; min-height: 275px; padding: 27px; border: 1px solid #8096a444; border-top-color: rgba(var(--credential-rgb), .58); border-radius: 5px; background: radial-gradient(ellipse at 20% 45%, rgba(var(--credential-rgb), .105), transparent 65%), linear-gradient(135deg, #111d29ee, #080f1cf5); box-shadow: 0 16px 45px #0004, inset 0 1px 0 #ffffff08; }
+.credential-card:before { content: ''; position: absolute; inset: 0; background: radial-gradient(ellipse at var(--hx, 20%) var(--hy, 30%), rgba(var(--credential-rgb), .07), transparent 55%); pointer-events: none; }
+.credential-card:after { content: ''; position: absolute; top: 0; left: 27px; width: 58px; height: 2px; background: var(--credential-accent); box-shadow: 0 0 15px rgba(var(--credential-rgb), .2); }
+.credential-card--hcia { --credential-accent: #ffa5a8; --credential-rgb: 239, 110, 117; }
+.credential-card--degree { --credential-accent: #a9e5ff; --credential-rgb: 110, 187, 229; }
+.credential-card--award { --credential-accent: #d2b5ff; --credential-rgb: 172, 123, 244; }
+.credential-visual { grid-column: 1; grid-row: 1 / 3; min-width: 0; height: 215px; margin: 0; background: none; display: flex; align-items: center; justify-content: center; }
+.credential-visual:before { inset: auto 6% 6%; width: 88%; height: 18%; border: 1px solid rgba(var(--credential-rgb, 150, 205, 222), .24); border-radius: 50%; transform: none; background: radial-gradient(ellipse, rgba(var(--credential-rgb, 150, 205, 222), .14), transparent 72%); animation: none; }
+.credential-visual img { max-width: 100%; object-fit: contain; }
+.ejpt-visual img { width: 135px; height: 180px; filter: drop-shadow(0 12px 24px #cc237f30); }
+.hcia-visual img { width: 172px; height: auto; padding: 0; background: none; border-radius: 0; margin: 0 0 10px; filter: drop-shadow(0 10px 24px #fa678724); }
+.hcia-visual > span { font: 650 36px/1 var(--sans); letter-spacing: .06em; color: #f4f5f8; }
+.hcia-visual small { font: 8px/1.7 var(--mono); color: #c7c6d1; margin-top: 11px; text-align: center; max-width: 165px; }
+.credential-copy { grid-column: 2; grid-row: 1; position: relative; align-self: center; margin: 0 0 19px; }
+.credential-card .credential-issuer { display: block; font: 9px/1.75 var(--mono); letter-spacing: .08em; color: var(--credential-accent); }
+.credential-card h3 { font: 600 clamp(23px, 2.2vw, 34px)/1.15 var(--sans); letter-spacing: -.04em; color: #f4f6fa; margin: 11px 0 10px; overflow-wrap: anywhere; }
+.credential-card p { font: 13px/1.75 var(--sans); color: #c6d0dc; margin: 0; }
+.credential-type { display: inline-flex; align-items: center; gap: 7px; font: 8px/1.4 var(--mono); color: #d7e8e4; letter-spacing: .07em; margin-top: 15px; }
+.credential-type:before { content: ''; width: 4px; height: 4px; background: var(--credential-accent); box-shadow: 0 0 7px rgba(var(--credential-rgb), .3); }
+.credential-bottom { grid-column: 2; grid-row: 2; align-self: end; width: 100%; min-height: 44px; padding: 10px 0 0; font: 9px/1.6 var(--mono); letter-spacing: .045em; color: #d0dce5; border-top: 1px solid #a0bfd02f; }
+.credential-bottom b { color: var(--credential-accent); font: 24px var(--sans); transition: translate .25s; }
+.credential-bottom:hover { color: var(--credential-accent); }
+.credential-card:focus-within { border-color: var(--credential-accent); }
+.credential-card--degree, .credential-card--award { min-height: 220px; grid-template-columns: minmax(100px, 30%) minmax(0, 1fr); }
+.credential-card--degree .credential-visual, .credential-card--award .credential-visual { height: 155px; color: var(--credential-accent); }
+.credential-card--degree h3, .credential-card--award h3 { font-size: clamp(22px, 1.9vw, 29px); }
+.credential-card .degree-visual > span { font: 400 29px var(--serif); color: #d7f5ff; }
+.credential-card .depi-visual > span { font: 9px/1.6 var(--mono); color: #dbccf6; letter-spacing: .045em; }
+.credential-dialog-art { background: radial-gradient(ellipse, #28334a80, transparent 72%), #070d17; }
+.credential-dialog-art .credential-visual { display: flex; height: 230px; }
+.credential-dialog-art .hcia-visual img { width: 180px; }
+.credential-dialog-art .credential-visual:before { display: none; }
+@media (hover: hover) and (pointer: fine) {
+  .credential-card:hover { border-color: rgba(var(--credential-rgb), .6); }
+  .credential-card:hover .credential-bottom b { translate: 2px -2px; }
+}
+@media (max-width: 1100px) {
+  .credential-card { padding: 23px; gap: 0 20px; grid-template-columns: minmax(110px, 38%) minmax(0, 1fr); }
+  .credential-card h3 { font-size: 25px; }
+  .credential-card--degree h3, .credential-card--award h3 { font-size: 23px; }
+  .hcia-visual > span { font-size: 30px; }
+  .ejpt-visual img { width: 118px; height: 160px; }
+}
+@media (max-width: 800px) {
+  .credentials-strip { padding: 52px 5.5%; }
+  .credential-grid { grid-template-columns: minmax(0, 1fr); gap: 16px; }
+  .credential-card { grid-template-columns: minmax(150px, 36%) minmax(0, 1fr); min-height: 245px; }
+  .credential-card h3 { font-size: 31px; }
+  .credential-visual { height: 190px; }
+  .ejpt-visual img { width: 133px; height: 177px; }
+  .credential-card--degree, .credential-card--award { min-height: 195px; }
+  .credential-card--degree h3, .credential-card--award h3 { font-size: 27px; }
+  .credentials-heading > p { max-width: 210px; font-size: 13px; }
+  .orb-zone { min-height: 410px; }
+}
+@media (max-width: 520px) {
+  .credentials-strip { padding: 44px 23px 50px; }
+  .credentials-heading { display: block; margin-bottom: 27px; }
+  .credentials-heading h2 { font-size: clamp(35px, 10vw, 46px); margin: 19px 0 18px; }
+  .credentials-heading > p { font-size: 14px; max-width: none; margin: 0 0 13px; }
+  .credential-card { padding: 21px 18px; gap: 0 18px; grid-template-columns: minmax(0, 37%) minmax(0, 1fr); min-height: 246px; }
+  .credential-visual { height: 192px; }
+  .ejpt-visual img { width: 109px; height: 151px; }
+  .hcia-visual img { width: 112px; padding: 0; margin-bottom: 10px; }
+  .hcia-visual > span { font-size: 26px; }
+  .hcia-visual small { font-size: 7px; letter-spacing: 0; }
+  .credential-card h3 { font-size: clamp(21px, 5.9vw, 29px); line-height: 1.2; }
+  .credential-card .credential-issuer { font-size: 8px; letter-spacing: .045em; }
+  .credential-card p { font-size: 12px; line-height: 1.8; }
+  .credential-card--degree, .credential-card--award { min-height: 220px; }
+  .credential-card--degree h3, .credential-card--award h3 { font-size: 23px; }
+  .credential-bottom { min-height: 44px; font-size: 8px; letter-spacing: .015em; }
+  .credential-type { font-size: 8px; line-height: 1.7; }
+  .credential-card .depi-visual > span { font-size: 7px; text-align: center; }
+  .credential-card .degree-visual svg, .credential-card .depi-visual svg { width: 92px; height: 86px; max-width: 100%; }
+  .orb-zone { height: clamp(360px, 102vw, 440px); min-height: 360px; }
+  .globe-caption { bottom: 13px; font-size: 9px; }
+  .globe-caption small { font-size: 8px; }
+}
+@media (max-width: 360px) {
+  .credential-card { padding: 19px 14px; gap: 0 13px; }
+  .credential-card h3, .credential-card--degree h3, .credential-card--award h3 { font-size: 21px; }
+  .credential-card p { font-size: 12px; }
+}
+@media (prefers-reduced-motion: reduce) { .credential-card, .credential-bottom b { transition: none; } }
+@media (forced-colors: active) { .hero h1 > span, .project-intro h2 span, .cv-header h2 em, .contact h2 em { background: none; color: CanvasText; } }

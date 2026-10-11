@@ -23,7 +23,7 @@ for (const [, url] of html.matchAll(/href="([^"]+\.css[^\"]*)"/g)) {
   for (const match of read(file).matchAll(/url\((?:(['"])(.*?)\1|([^)'"\s]+))\)/gs)) verifyURL(match[2] || match[3], file);
 }
 assert(!html.includes('fonts.googleapis.com'), 'Fonts must be local');
-assert(html.includes('refinement.css?v=8.2'), 'Missing current design refinements');
+assert(html.includes('refinement.css?v=8.3'), 'Missing current design refinements');
 for (const family of ['DM Serif Display', 'DM Sans', 'DM Mono', 'Allura']) assert(read('fonts.css').includes(family));
 const manifest = JSON.parse(read('assets/motion/manifest.json'));
 for (const [name, spec] of Object.entries(manifest)) {

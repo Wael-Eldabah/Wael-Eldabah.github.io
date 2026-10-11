@@ -1,3 +1,4 @@
+import { DEFAULT_MOTION_SPEED } from './src/motion.js?v=8.3';
 // Cinematic enhancements keep navigation native and all content readable without JS.
 const $ = s => document.querySelector(s);
 const $$ = s => [...document.querySelectorAll(s)];
@@ -125,7 +126,7 @@ function drawAtmosphere(ms) {
   frame = 0; if (document.hidden || !ctx) return;
   if (motion && lastTime && ms - lastTime < 32) { requestAmbient(); return; }
   const dt = lastTime ? Math.min(ms - lastTime, 80) : 16; lastTime = ms;
-  if (motion) time += dt * .001;
+  if (motion) time += dt * .001 * DEFAULT_MOTION_SPEED;
   ctx.setTransform(ratio, 0, 0, ratio, 0, 0); ctx.clearRect(0, 0, width, height);
   const t = time, offset = scrollY * .035;
   for (const p of particles) {
@@ -183,3 +184,12 @@ dossierTabs.forEach((tab,i)=>{
  tab.addEventListener('click',()=>selectDossier(i));
  tab.addEventListener('keydown',e=>{let next;if(e.key==='ArrowRight')next=(i+1)%3;if(e.key==='ArrowLeft')next=(i+2)%3;if(e.key==='Home')next=0;if(e.key==='End')next=2;if(next!==undefined){e.preventDefault();selectDossier(next);dossierTabs[next].focus();}});
 });
+
+// Only continuous ambience accelerates; readable entrances and UI transitions keep their timing.
+function syncAmbientSpeed() {
+  for (const animation of document.getAnimations?.() || []) {
+    if (animation.effect?.getTiming().iterations === Infinity) animation.playbackRate = DEFAULT_MOTION_SPEED;
+  }
+}
+requestAnimationFrame(syncAmbientSpeed);
+document.addEventListener('portfolio:motion', syncAmbientSpeed);

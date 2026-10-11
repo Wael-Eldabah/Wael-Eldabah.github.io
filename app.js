@@ -1,3 +1,4 @@
+import { DEFAULT_MOTION_SPEED } from './src/motion.js?v=8.3';
 const $ = (s, root = document) => root.querySelector(s);
 const $$ = (s, root = document) => [...root.querySelectorAll(s)];
 const reduced = matchMedia('(prefers-reduced-motion: reduce)');
@@ -29,7 +30,7 @@ $('#disperseButton').addEventListener('click', e => {
 // Keep the readable HTML and environment available before loading any 3D code.
 let scenesPromise;
 const loadScenes = () => scenesPromise ||= (async () => {
-  try { sceneModule = await import('./dist/cinematic.js?v=8.2'); sceneModule.initScenes(); sceneModule.setMotion(playing); sceneModule.setSpread(dispersed); }
+  try { sceneModule = await import('./dist/cinematic.js?v=8.3'); sceneModule.initScenes(); sceneModule.setMotion(playing); sceneModule.setSpread(dispersed); }
   catch (e) { $('#disperseButton').hidden = true; $('.scene-caption').textContent = 'OBSIDIAN / VIOLET / MINT'; console.warn('Artwork fallback active.', e.message); }
 })();
 if ('requestIdleCallback' in window) requestIdleCallback(loadScenes, { timeout: 600 }); else setTimeout(loadScenes, 60);
@@ -107,7 +108,7 @@ function drawRadar(ms) {
   radarFrame = 0; if (!radarVisible || document.hidden || !radarContext) return;
   if (playing && radarLast && ms - radarLast < 32) { startRadar(); return; }
   const dt = radarLast ? Math.min(ms - radarLast, 100) : 16; radarLast = ms;
-  if (playing) radarTime += dt * .00012;
+  if (playing) radarTime += dt * .00012 * DEFAULT_MOTION_SPEED;
   const d = Math.min(devicePixelRatio || 1, 1.5), w = radarCanvas.clientWidth, h = radarCanvas.clientHeight;
   if (radarCanvas.width !== Math.round(w * d) || radarCanvas.height !== Math.round(h * d)) { radarCanvas.width = Math.round(w * d); radarCanvas.height = Math.round(h * d); }
   const ctx = radarContext; ctx.setTransform(d, 0, 0, d, 0, 0); ctx.clearRect(0, 0, w, h);
@@ -169,7 +170,7 @@ $('#speedRange').addEventListener('input', e => {
   const speed = Number(e.target.value); $('#speedValue').textContent = `${speed.toFixed(1)}×`; sceneModule?.controlSculpture({ speed });
 });
 $('#dimensionReset').addEventListener('click', () => {
-  sculptureRotation = { x: 0, y: 0 }; $('#speedRange').value = '1'; $('#speedValue').textContent = '1.0×'; sceneModule?.resetSculpture();
+  sculptureRotation = { x: 0, y: 0 }; $('#speedRange').value = String(DEFAULT_MOTION_SPEED); $('#speedValue').textContent = `${DEFAULT_MOTION_SPEED.toFixed(1)}×`; sceneModule?.resetSculpture();
 });
 $('#sculpturePulse').addEventListener('click', () => { if (sculpturePlaying) sceneModule?.controlSculpture({ pulse: 1 }); });
 function moveSculpture(dx,dy) {
