@@ -41,6 +41,11 @@ export const credentials = {
     description: 'Completed the HCCDA-Tech Essentials course and its course assessment. As stated on the document, this is a course-completion certificate and does not represent passing the Huawei Certification examination.',
     tags: ['18 JUL 2025', 'CLOUD FOUNDATIONS'], image: 'assets/credentials/hccda-training.webp', alt: 'Huawei ICT Academy HCCDA Tech Essentials course completion certificate'
   },
+  ciscoEthical: {
+    title: 'Ethical Hacker', issuer: 'CISCO NETWORKING ACADEMY · COURSE COMPLETION', kind: 'training',
+    description: 'Completed the Ethical Hacker course through Cisco Networking Academy as part of training with NTI. The certificate names ND Universities Online as the course provider.',
+    tags: ['28 FEB 2025', 'NTI TRAINING'], image: 'assets/credentials/cisco-ethical-hacker.webp', alt: 'Cisco Networking Academy Ethical Hacker course completion certificate awarded to Wael Eldabah on February 28, 2025'
+  },
   depi: {
     title: 'Best Team Leader', issuer: 'DEPI · RECOGNITION', kind: 'recognition',
     description: 'Best Team Leader recognition at the Digital Egypt Pioneers Initiative ceremony with Dr. Amr Talaat, Minister of Communications and Information Technology. The photograph is from Wael’s personal event archive.',

@@ -8,6 +8,7 @@
 - `nti-official.png`: National Telecommunication Institute logo from <https://www.nti.sci.eg/images/logo.png>, referenced by the institute’s site navigation.
 - `iti-official.png`: ITI logo from <https://iti.gov.eg/assets/images/organization/iti-logo.png>, referenced by the official site application.
 - The DEPI provider mark is a viewport onto the badge in the user-supplied DEPI Forensics Investigator certificate. The complete document is preserved; no logo is redrawn.
+- The Cisco provider mark is a viewport onto the original Cisco logo in the supplied Ethical Hacker certificate. The complete certificate remains available in the viewer. The NTI training context was supplied by Wael; the certificate names ND Universities Online as the course provider and records completion on 28 February 2025.
 
 Issuer names and marks belong to their respective owners. The personal eJPT verification link was supplied by Wael: <https://certs.ine.com/cec37ed6-8feb-495e-bd16-5fe978ef1c0d#acc.IJqoARQM>. Retrieval confirmed a responding application shell, but its dynamic verification content was not independently read in this session. The displayed award date and certification ID come from the supplied certificate.
 
@@ -27,6 +28,7 @@ The following attachments were encoded as WebP at original dimensions, without c
 | IMG_5402.jpeg | credentials/depi-pentest.webp | DEPI penetration-testing program |
 | IMG_5017.jpeg | credentials/nti-hcia.webp | NTI / Huawei HCIA training |
 | IMG_4239.jpeg | credentials/depi-recognition.webp | DEPI recognition ceremony |
+| IMG_5512.jpeg | credentials/cisco-ethical-hacker.webp | Cisco Networking Academy Ethical Hacker course completion, added in V8.4.1 |
 
 
 ## Geography

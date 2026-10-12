@@ -1,7 +1,7 @@
 # Wael El-Dabah — Living Obsidian
 
 Personal offensive-security portfolio at https://wael-eldabah.github.io/.
-The main page is V8.4. `_preview-v8/` preserves the earlier V8.1 study.
+The main page is V8.4.1. `_preview-v8/` preserves the earlier V8.1 study.
 
 ## Design
 
@@ -9,7 +9,7 @@ The main page is V8.4. `_preview-v8/` preserves the earlier V8.1 study.
 - Obsidian, mint glass and violet light connect the chapters. Project stages and CV perspectives have coordinated accents. Important text remains separate from decorative artwork.
 - The mobile hero uses content-driven grid placement: copy, full-width sculpture, controls and portrait occupy separate rows. Controls have larger touch targets and readable small text. The display face was selected by comparing rendered letter shapes against the supplied design image, not by claiming an exact font identification.
 - EyeGuard workflow buttons synchronize with the research tabs. The CV dossier includes Industry, Research and Academic perspectives, real PDF previews, and view/download links.
-- Silver-white display type and mint/lilac section accents preserve hierarchy against the obsidian background. The compact credential desk features eJPT with Wael’s personal INE verification link, seven training programs in a provider-icon grid, and a recognition ribbon. Ten supplied certificate/event images open in an accessible document viewer. HCIA and HCCDA are described as training/course completion, based on the supplied evidence, not vendor examination credentials. Education remains available through a compact B.Sc. entry. Sources are recorded in `assets/SOURCES.md`. Existing CV PDF documents are unchanged.
+- Silver-white display type and mint/lilac section accents preserve hierarchy against the obsidian background. The compact credential desk features eJPT with Wael’s personal INE verification link, eight training programs in a provider-icon grid, and a recognition ribbon. Eleven supplied certificate/event images open in an accessible document viewer. HCIA and HCCDA are described as training/course completion, based on the supplied evidence, not vendor examination credentials. Education remains available through a compact B.Sc. entry. Sources are recorded in `assets/SOURCES.md`. Existing CV PDF documents are unchanged.
 
 ## Motion
 
@@ -40,4 +40,4 @@ npm run serve
 
 Use Node.js 20.11+ and Python for the simple static server. GitHub Pages serves the committed files; it does not run the Node build. Commit `dist/cinematic.js` whenever its source changes. Old Three.js source and bundle are historical and are not loaded by the main page.
 
-`scripts/verify.mjs` checks local assets and anchors, unique IDs, font-family wiring, complete video segment sets and CV file signatures. Verification scope and remaining limits are in `docs/verification/v8.4.md`.
+`scripts/verify.mjs` checks local assets and anchors, unique IDs, font-family wiring, complete video segment sets and CV file signatures. Verification scope and remaining limits are in `docs/verification/v8.4.md`; the Cisco course addition is recorded in `docs/verification/v8.4.1.md`.

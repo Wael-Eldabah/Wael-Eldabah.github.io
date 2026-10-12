@@ -1,5 +1,5 @@
 import { DEFAULT_MOTION_SPEED } from './src/motion.js?v=8.4';
-import { credentials } from './src/credentials.js?v=8.4';
+import { credentials } from './src/credentials.js?v=8.4.1';
 // Cinematic enhancements keep navigation native and all content readable without JS.
 const $ = s => document.querySelector(s);
 const $$ = s => [...document.querySelectorAll(s)];

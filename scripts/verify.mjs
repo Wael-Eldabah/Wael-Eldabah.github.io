@@ -24,7 +24,7 @@ for (const [, url] of html.matchAll(/href="([^"]+\.css[^\"]*)"/g)) {
   for (const match of read(file).matchAll(/url\((?:(['"])(.*?)\1|([^)'"\s]+))\)/gs)) verifyURL(match[2] || match[3], file);
 }
 assert(!html.includes('fonts.googleapis.com'), 'Fonts must be local');
-assert(html.includes('refinement.css?v=8.4'), 'Missing current design refinements');
+assert(html.includes('refinement.css?v=8.4.1'), 'Missing current design refinements');
 for (const family of ['DM Serif Display', 'DM Sans', 'DM Mono', 'Allura']) assert(read('fonts.css').includes(family));
 const manifest = JSON.parse(read('assets/motion/manifest.json'));
 for (const [name, spec] of Object.entries(manifest)) {
@@ -43,8 +43,8 @@ for (const [key, record] of Object.entries(credentials)) {
   if (record.image) assert(existsSync(resolve(root, record.image)), `Missing credential image: ${key}`);
 }
 assert.equal(Object.values(credentials).filter(r => r.kind === 'certification').length, 1);
-assert.equal(Object.values(credentials).filter(r => r.kind === 'training').length, 7);
+assert.equal(Object.values(credentials).filter(r => r.kind === 'training').length, 8);
 assert.equal(credentials.ejpt.href, 'https://certs.ine.com/cec37ed6-8feb-495e-bd16-5fe978ef1c0d#acc.IJqoARQM');
 assert.equal(credentials.hcia.kind, 'training');
 assert.equal(credentials.hccda.kind, 'training');
-console.log('Verified 11 credential records, 10 document images, 7 training programs and the personal INE verification link.');
+console.log('Verified 12 credential records, 11 document images, 8 training programs and the personal INE verification link.');
