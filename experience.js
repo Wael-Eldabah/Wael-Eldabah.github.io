@@ -1,4 +1,5 @@
-import { DEFAULT_MOTION_SPEED } from './src/motion.js?v=8.3';
+import { DEFAULT_MOTION_SPEED } from './src/motion.js?v=8.4';
+import { credentials } from './src/credentials.js?v=8.4';
 // Cinematic enhancements keep navigation native and all content readable without JS.
 const $ = s => document.querySelector(s);
 const $$ = s => [...document.querySelectorAll(s)];
@@ -81,33 +82,59 @@ document.addEventListener('portfolio:stage', e => {
   $('.research-orbit').dataset.stage = e.detail.index;
 });
 
-// Actual official badge / issuer graphics, with clearly separated personal achievements.
-const credentials = {
-  ejpt: { title: 'eJPT', issuer: 'INE SECURITY / EARNED', description: 'Junior Penetration Tester. A practical certification covering assessment methodology, host and network auditing, host and network penetration testing, and web application security.', tags: ['PRACTICAL ASSESSMENT', 'PENETRATION TESTING'], href: 'https://ine.com/security/certifications/ejpt-certification', link: 'ABOUT THE CERTIFICATION ↗' },
-  hcia: { title: 'HCIA-Security', issuer: 'HUAWEI / EARNED', description: 'Huawei Certified ICT Associate in Security. A foundation in network and information security, security technologies and protection of enterprise networks.', tags: ['NETWORK SECURITY', 'ICT ASSOCIATE'], href: 'https://e.huawei.com/en/talent/cert/', link: 'HUAWEI CERTIFICATIONS ↗' },
-  degree: { title: 'Software Engineering', issuer: 'ASSIUT NATIONAL UNIVERSITY / 2026', description: 'Bachelor’s degree in Software Engineering, Faculty of Computers and Artificial Intelligence. Final grade: Very Good. Graduation project: EyeGuard — Excellent.', tags: ['BACHELOR OF SCIENCE', 'EYEGUARD'], href: 'cv/Wael_El-Dabah_Academic_CV.pdf', link: 'VIEW ACADEMIC CV ↗' },
-  depi: { title: 'Ideas with impact.', issuer: 'DIGITOPIA / DEPI', description: 'EyeGuard achieved fourth place nationwide in Digitopia. Recognized as Best Team Leader in the Digital Egypt Pioneers Initiative.', tags: ['4TH NATIONWIDE', 'BEST TEAM LEADER'], href: 'https://depi.gov.eg/', link: 'ABOUT DEPI ↗' }
-};
+// The evidence viewer distinguishes an exam credential, training, recognition and education.
 const credentialModal = $('#credentialModal');
-let credentialTrigger, credentialWasPlaying = false;
-$$('[data-credential]').forEach(button => button.addEventListener('click', () => {
-  const record = credentials[button.dataset.credential]; credentialTrigger = button;
-  $('#credentialArt').replaceChildren(button.closest('article').querySelector('.credential-visual').cloneNode(true));
+const credentialKeys = Object.keys(credentials);
+let credentialTrigger, credentialWasPlaying = false, activeCredential = 0;
+function renderCredential(key) {
+  const record = credentials[key];
+  if (!record) return;
+  activeCredential = credentialKeys.indexOf(key);
+  credentialModal.dataset.kind = record.kind;
+  const art = $('#credentialArt'); art.replaceChildren();
+  if (record.image) {
+    const image = document.createElement('img'); image.src = record.image; image.alt = record.alt; image.decoding = 'async';
+    image.className = record.photo ? 'credential-document is-photo' : 'credential-document'; art.append(image);
+  } else {
+    const badge = document.createElement('span'); badge.className = 'academic-display'; badge.textContent = record.badge; art.append(badge);
+  }
   $('#credentialIssuer').textContent = record.issuer; $('#credentialTitle').textContent = record.title; $('#credentialDescription').textContent = record.description;
   $('#credentialTags').replaceChildren(...record.tags.map(text => { const span = document.createElement('span'); span.textContent = text; return span; }));
-  $('#credentialLink').href = record.href; $('#credentialLink').textContent = record.link;
+  $('#credentialLink').href = record.href || record.image; $('#credentialLink').textContent = record.link || (record.photo ? 'OPEN FULL PHOTO ↗' : 'OPEN FULL CERTIFICATE ↗');
+  const imageLink = $('#credentialImageLink'); imageLink.hidden = !(record.href && record.image);
+  if (record.image) imageLink.href = record.image;
+  $('#credentialCounter').textContent = `${String(activeCredential + 1).padStart(2,'0')} / ${String(credentialKeys.length).padStart(2,'0')}`;
+}
+$$('[data-credential]').forEach(button => button.addEventListener('click', () => {
+  if (!credentials[button.dataset.credential]) return;
+  credentialTrigger = button; renderCredential(button.dataset.credential);
   credentialWasPlaying = !document.body.classList.contains('motion-paused');
   if (credentialWasPlaying) motionButton.click();
   credentialModal.showModal(); $('#credentialClose').focus();
   document.dispatchEvent(new CustomEvent('portfolio:modal', { detail: { open: true } }));
 }));
+function stepCredential(direction) { renderCredential(credentialKeys[(activeCredential + direction + credentialKeys.length) % credentialKeys.length]); }
+$('#credentialPrevious').addEventListener('click', () => stepCredential(-1));
+$('#credentialNext').addEventListener('click', () => stepCredential(1));
 $('#credentialClose').addEventListener('click', () => credentialModal.close());
 credentialModal.addEventListener('click', e => { if (e.target === credentialModal) credentialModal.close(); });
 credentialModal.addEventListener('close', () => {
   document.dispatchEvent(new CustomEvent('portfolio:modal', { detail: { open: false } }));
-  if (credentialWasPlaying && document.body.classList.contains('motion-paused')) motionButton.click();
+  if (credentialWasPlaying && !reduced.matches && document.body.classList.contains('motion-paused')) motionButton.click();
   credentialTrigger?.focus();
 });
+const trainingGallery = $('#trainingGallery');
+function updateTrainingScroll() {
+  const maximum = Math.max(0, trainingGallery.scrollWidth - trainingGallery.clientWidth);
+  $('#trainingPrevious').disabled = trainingGallery.scrollLeft <= 2;
+  $('#trainingNext').disabled = trainingGallery.scrollLeft >= maximum - 2;
+}
+for (const [id,direction] of [['#trainingPrevious',-1],['#trainingNext',1]]) $(id).addEventListener('click', () => {
+  trainingGallery.scrollBy({left: direction * Math.max(140, trainingGallery.clientWidth * .78), behavior: motion && !reduced.matches ? 'smooth' : 'auto'});
+});
+trainingGallery.addEventListener('scroll', updateTrainingScroll, {passive:true});
+new ResizeObserver(updateTrainingScroll).observe(trainingGallery);
+requestAnimationFrame(updateTrainingScroll);
 
 // A low-resolution atmosphere: projected geometric fragments, dust, and signal paths.
 // It sits behind the HTML; it never captures pointer or keyboard input.

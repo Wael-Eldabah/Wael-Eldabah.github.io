@@ -1,6 +1,7 @@
 import assert from 'node:assert/strict';
 import { readFileSync, existsSync } from 'node:fs';
 import { resolve, dirname } from 'node:path';
+import { credentials } from '../src/credentials.js';
 
 const root = resolve(import.meta.dirname, '..');
 const read = path => readFileSync(resolve(root, path), 'utf8');
@@ -23,7 +24,7 @@ for (const [, url] of html.matchAll(/href="([^"]+\.css[^\"]*)"/g)) {
   for (const match of read(file).matchAll(/url\((?:(['"])(.*?)\1|([^)'"\s]+))\)/gs)) verifyURL(match[2] || match[3], file);
 }
 assert(!html.includes('fonts.googleapis.com'), 'Fonts must be local');
-assert(html.includes('refinement.css?v=8.3'), 'Missing current design refinements');
+assert(html.includes('refinement.css?v=8.4'), 'Missing current design refinements');
 for (const family of ['DM Serif Display', 'DM Sans', 'DM Mono', 'Allura']) assert(read('fonts.css').includes(family));
 const manifest = JSON.parse(read('assets/motion/manifest.json'));
 for (const [name, spec] of Object.entries(manifest)) {
@@ -36,3 +37,14 @@ for (const kind of ['Industry', 'Research', 'Academic']) {
   assert.equal(readFileSync(resolve(root, `cv/Wael_El-Dabah_${kind}_CV.pdf`)).subarray(0, 4).toString(), '%PDF');
 }
 console.log(`Verified ${references} local references, ${ids.length} unique IDs, 4 complete motion variants, 4 font families and 3 CV PDFs.`);
+
+for (const [key, record] of Object.entries(credentials)) {
+  assert(html.includes(`data-credential="${key}"`), `Missing credential trigger: ${key}`);
+  if (record.image) assert(existsSync(resolve(root, record.image)), `Missing credential image: ${key}`);
+}
+assert.equal(Object.values(credentials).filter(r => r.kind === 'certification').length, 1);
+assert.equal(Object.values(credentials).filter(r => r.kind === 'training').length, 7);
+assert.equal(credentials.ejpt.href, 'https://certs.ine.com/cec37ed6-8feb-495e-bd16-5fe978ef1c0d#acc.IJqoARQM');
+assert.equal(credentials.hcia.kind, 'training');
+assert.equal(credentials.hccda.kind, 'training');
+console.log('Verified 11 credential records, 10 document images, 7 training programs and the personal INE verification link.');

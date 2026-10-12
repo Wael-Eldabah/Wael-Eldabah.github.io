@@ -1,4 +1,4 @@
-import { DEFAULT_MOTION_SPEED } from './src/motion.js?v=8.3';
+import { DEFAULT_MOTION_SPEED } from './src/motion.js?v=8.4';
 const $ = (s, root = document) => root.querySelector(s);
 const $$ = (s, root = document) => [...root.querySelectorAll(s)];
 const reduced = matchMedia('(prefers-reduced-motion: reduce)');
@@ -30,7 +30,7 @@ $('#disperseButton').addEventListener('click', e => {
 // Keep the readable HTML and environment available before loading any 3D code.
 let scenesPromise;
 const loadScenes = () => scenesPromise ||= (async () => {
-  try { sceneModule = await import('./dist/cinematic.js?v=8.3'); sceneModule.initScenes(); sceneModule.setMotion(playing); sceneModule.setSpread(dispersed); }
+  try { sceneModule = await import('./dist/cinematic.js?v=8.4'); sceneModule.initScenes(); sceneModule.setMotion(playing); sceneModule.setSpread(dispersed); }
   catch (e) { $('#disperseButton').hidden = true; $('.scene-caption').textContent = 'OBSIDIAN / VIOLET / MINT'; console.warn('Artwork fallback active.', e.message); }
 })();
 if ('requestIdleCallback' in window) requestIdleCallback(loadScenes, { timeout: 600 }); else setTimeout(loadScenes, 60);
